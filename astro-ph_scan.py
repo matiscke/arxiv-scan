@@ -204,7 +204,7 @@ def main():
     parser.add_option('-v', '--rating', dest='rating',
             help='minumim rating for result list', default=5)
     parser.add_option('--reverse', dest='reverse',
-            help='reverse list', action='store_true', default=False)
+            help='reverse list', action='store_false', default=True)
     parser.add_option('--debug', dest='debug',
             help='debug', action='store_true', default=False)
     (options, args) = parser.parse_args()
