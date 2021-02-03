@@ -1,6 +1,7 @@
 
 
 TITLE_KEYWORDS = {
+    'Interplanetary': 4,
     'Supernova': 3,
     'Core-Collapse': 2,
     'Core': 1, # core is often found
