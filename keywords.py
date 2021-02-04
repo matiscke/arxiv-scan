@@ -6,9 +6,4 @@ def read_keywords(filename='keywords.txt'):
     return keywords
 
 TITLE_KEYWORDS = read_keywords()
-
-AUTHORS = {
-    'Mordasini':5,
-    'Alibert' : 5,
-    'Espinoza' : 5
-}
+AUTHORS = read_keywords('authors.txt')
