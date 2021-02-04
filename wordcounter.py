@@ -1,6 +1,9 @@
 import json
+import os.path
 from collections import Counter
 from re import findall
+
+import keywords
 
 
 def _count_words(fname):
@@ -24,7 +27,18 @@ def select_keywords(counts):
     counts = dict(sorted(counts.items(), key=lambda item: item[1], reverse=True))
 
     print('for each suggested keyword, give a rating from 1 to 5 or reject it by pressing "enter".\nConclude by pressing "C".')
-    selected = {}
+
+    if os.path.exists('keywords.txt'):
+        # don't ask for previously added words
+        selected = keywords.read_keywords('keywords.txt')
+        for key in selected:
+            try:
+                counts.pop(key)
+            except KeyError:
+                pass
+    else:
+        selected = {}
+
     for keyword in counts:
         while True:
             # repeat current iteration until a correct input was given
