@@ -7,7 +7,6 @@ from keywords import TITLE_KEYWORDS, AUTHORS
 
 ARXIV_BASE = 'https://arxiv.org/list/astro-ph.EP'
 DEBUG = False
-# CAFILE = '/afs/mpa/home/rglas/software/cert/arxiv.org.crt'
 
 REGEX = \
 r'''<dt><a name="item(\d+)">.*<span class="list-identifier"><a href="/abs/([0-9.]*)".*</span></dt>
@@ -198,11 +197,11 @@ def main():
 
     parser = OptionParser()
     parser.add_option('-d', '--date', dest='date',
-            help='date in format yyyy-mm', default=None)
+            help='date in format yyyy-mm, or "new", or "recent"', default=None)
     parser.add_option('-l', '--len', dest='length',
-            help='length of result list, all is -1', default=20)
+            help='length of result list, all is -1', default=-1)
     parser.add_option('-v', '--rating', dest='rating',
-            help='minumim rating for result list', default=5)
+            help='minimum rating for result list', default=5)
     parser.add_option('--reverse', dest='reverse',
             help='reverse list', action='store_false', default=True)
     parser.add_option('--debug', dest='debug',
@@ -213,13 +212,18 @@ def main():
         global DEBUG
         DEBUG = True
 
-    if options.date is None:
+    if (options.date == 'new') | (options.date is None):
         address = '{base:s}/new'.format(base=ARXIV_BASE)
+        print("querying authors and titles for new submissions (today's listing)")
+    elif options.date == 'recent':
+        address = '{base:s}/recent'.format(base=ARXIV_BASE)
+        print('querying authors and titles for recent submissions')
     else:
         year, month = options.date.split('-')
         year = year[2:4] if len(year) == 4 else year
         address = '{base:s}/{year:2.2s}{month:2.2s}?show=3000'.format(
                 base=ARXIV_BASE, year=year, month=month)
+        print('querying authors and titles for listings in {:2.2s}/{:2.2s}'.format(month, year))
 
     debug_print('using arxiv address:', address)
     data = load(address)
