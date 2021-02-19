@@ -197,7 +197,7 @@ def main():
 
     parser = OptionParser()
     parser.add_option('-d', '--date', dest='date',
-            help='date in format yyyy-mm, or "new", or "recent"', default=None)
+            help='date in format yyyy-mm, or "new", or "recent"', default='new')
     parser.add_option('-l', '--len', dest='length',
             help='length of result list, all is -1', default=-1)
     parser.add_option('-v', '--rating', dest='rating',
