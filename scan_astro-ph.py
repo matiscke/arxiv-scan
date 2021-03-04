@@ -201,7 +201,7 @@ def main():
     parser.add_option('-l', '--len', dest='length',
             help='length of result list, all is -1', default=-1)
     parser.add_option('-v', '--rating', dest='rating',
-            help='minimum rating for result list', default=5)
+            help='minimum rating for result list', default=6)
     parser.add_option('--reverse', dest='reverse',
             help='reverse list', action='store_false', default=True)
     parser.add_option('--debug', dest='debug',
