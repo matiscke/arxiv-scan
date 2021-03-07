@@ -34,7 +34,7 @@ Just run `scan_astro-ph.py`.
 ```
 '-d', '--date': date in format yyyy-mm, or "new", or "recent"', default=None
 '-l', '--len': length of result list, all is -1, default=-1
-'-v', '--rating': minimum rating for result list, default=5
+'-v', '--rating': minimum rating for result list, default=6
 '--reverse': reverse list (highest ranked paper on top), default=True
 '--debug': debug mode, default=False
 ```
