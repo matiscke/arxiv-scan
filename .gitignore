@@ -2,6 +2,9 @@
 authors.txt
 keywords.txt
 
+# Auto generated version file
+scan_astroph/_version.py
+
 # Python
 *.py[cod]
 __pycache__/
