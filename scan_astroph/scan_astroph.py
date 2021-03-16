@@ -9,7 +9,7 @@ ARXIV_BASE = 'https://arxiv.org/list/astro-ph.EP'
 DEBUG = False
 
 REGEX = \
-r'''<dt><a name="item(\d+)">.*<span class="list-identifier"><a href="/abs/([0-9.]*)".*</span></dt>
+r'''<dt><a name="item(\d+)">.*<span class="list-identifier"><a href="/abs/([0-9.]*)".*<\/a> (?!\(replaced)(?!\(cross-list).*</span></dt>
 <dd>
 <div class="meta">
 <div class="list\-title mathjax">\s*
