@@ -3,7 +3,7 @@ import os.path
 from collections import Counter
 from re import findall
 
-import keywords
+from . import keywords
 
 
 def _count_words(fname):
@@ -63,9 +63,11 @@ def selected2file(selected, filename='keywords.txt'):
         file.write(json.dumps(selected))
 
 
-if __name__ == "__main__":
+def main():
     les_mis_file = input('path to file: ')
     counts = most_common_words_in_file(les_mis_file, 200, verbose=False)
     selected = select_keywords(counts)
     selected2file(selected)
 
+if __name__ == "__main__":
+    main()

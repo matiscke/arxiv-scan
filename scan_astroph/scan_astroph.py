@@ -3,7 +3,7 @@
 from __future__ import division, absolute_import, print_function, unicode_literals
 
 import re
-from keywords import TITLE_KEYWORDS, AUTHORS
+from .keywords import TITLE_KEYWORDS, AUTHORS
 
 ARXIV_BASE = 'https://arxiv.org/list/astro-ph.EP'
 DEBUG = False
@@ -238,6 +238,3 @@ def main():
     entries = sort(entries, rating_min=int(options.rating),
             reverse=options.reverse, length=int(options.length))
     show(entries)
-
-if __name__ == '__main__':
-    main()
