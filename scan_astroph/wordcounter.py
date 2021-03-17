@@ -3,7 +3,7 @@ import os.path
 from collections import Counter
 from re import findall
 
-from . import keywords
+from . import config
 
 
 def _count_words(fname):
@@ -30,7 +30,7 @@ def select_keywords(counts):
 
     if os.path.exists('keywords.txt'):
         # don't ask for previously added words
-        selected = keywords.read_keywords('keywords.txt')
+        selected = config.read_keywords('keywords.txt')
         for key in selected:
             try:
                 counts.pop(key)
