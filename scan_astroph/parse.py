@@ -30,15 +30,15 @@ def parse_html(data, cross_lists=True, resubmissions=False):
         ignore_pattern += r'(?!\(replaced)'
 
     regex = REGEX_TEMPLATE.format(ignore_pattern=ignore_pattern)
-    m = re.search(regex, data.decode())
+    m = re.search(regex, data)
     while m is not None:
         authors = m.group(4)
         m_au = re.findall(REGEX_AUTHORS, authors)
         entries.append(Entry(number=m.group(1),
                         id=m.group(2),
-                        title=m.group(3),
+                        title=" ".join(m.group(3).split()),
                         authors=m_au,
                         abstract=''))
         data = data[m.end():]
-        m = re.search(regex, data.decode())
+        m = re.search(regex, data)
     return entries

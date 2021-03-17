@@ -1,17 +1,13 @@
 """Miscellaneous function which don't fit in other modules"""
 
-def load_html(address):
-    ''' Load content from website'''
-    kwargs = {}
-    try:
-        from ssl import create_default_context
-        from urllib.request import urlopen  # python 3
+import html
+from urllib.request import urlopen
 
-        # DeprecationWarning: cafile, capath and cadefault are deprecated
-        # kwargs['context'] = create_default_context(cafile=CAFILE)
-    except ImportError:
-        from urllib2 import urlopen  # python 2
 
-        # kwargs['cafile'] = CAFILE
-    f = urlopen(address, **kwargs)
-    return f.read()
+def load_html(address: str) -> str:
+    ''' Load content from website
+
+    Load HTML from address and convert HTML escape sequences to Unicode character
+    '''
+    with urlopen(address) as response:
+        return html.unescape(response.read().decode())

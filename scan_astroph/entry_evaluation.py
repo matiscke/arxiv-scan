@@ -9,13 +9,9 @@ class Entry(object):
     def __init__(self, number, id, title, authors, abstract):
         self.number = int(number)
         self.id = id
-        def clear(s):
-            return s.strip().replace('  ', ' ').replace('&#x27;', "'")
-        self.title = clear(title)
-        self.authors = []
-        for a in authors:
-            self.authors.append(clear(a))
-        self.abstract = clear(abstract)
+        self.title = title
+        self.authors = authors
+        self.abstract = abstract
         self.rating = 0
         self.title_marks = []
         self.author_marks = [False for a in self.authors]
