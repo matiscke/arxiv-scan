@@ -8,8 +8,8 @@ from .keywords import TITLE_KEYWORDS, AUTHORS
 ARXIV_BASE = 'https://arxiv.org/list/astro-ph.EP'
 DEBUG = False
 
-REGEX = \
-r'''<dt><a name="item(\d+)">.*<span class="list-identifier"><a href="/abs/([0-9.]*)".*<\/a> (?!\(replaced)(?!\(cross-list).*</span></dt>
+REGEX_TEMPLATE = \
+r'''<dt><a name="item(\d+)">.*<span class="list-identifier"><a href="/abs/([0-9.]*)".*<\/a> {ignore_pattern}.*</span></dt>
 <dd>
 <div class="meta">
 <div class="list\-title mathjax">\s*
@@ -71,14 +71,21 @@ def load(address):
     f = urlopen(address, **kwargs)
     return f.read()
 
-def scan(data):
+def scan(data, cross_lists=True, resubmissions=False):
     ''' Scan content and retrieve entries
 
     We use regular expressions REGEX and REGEX_AUTHORS.
     The return value is a list containing Entry objects.
     '''
     entries = []
-    m = re.search(REGEX, data.decode())
+    ignore_pattern = ""
+    if not cross_lists:
+        ignore_pattern += r'(?!\(cross-list)'
+    if not resubmissions:
+        ignore_pattern += r'(?!\(replaced)'
+
+    regex = REGEX_TEMPLATE.format(ignore_pattern=ignore_pattern)
+    m = re.search(regex, data.decode())
     while m is not None:
         authors = m.group(4)
         debug_print(m.group(1), m.group(3))
@@ -89,7 +96,7 @@ def scan(data):
                         authors=m_au,
                         abstract=''))
         data = data[m.end():]
-        m = re.search(REGEX, data.decode())
+        m = re.search(regex, data.decode())
     debug_print('First entry:', entries[0].id)
     debug_print('Last  entry:', entries[-1].id)
     return entries
@@ -204,6 +211,8 @@ def main():
             help='minimum rating for result list', default=6)
     parser.add_option('--reverse', dest='reverse',
             help='reverse list', action='store_false', default=True)
+    parser.add_option('--show-resubmissions', action='store_true', default=False)
+    parser.add_option('--ignore-cross-lists', action="store_true", default=False)
     parser.add_option('--debug', dest='debug',
             help='debug', action='store_true', default=False)
     (options, args) = parser.parse_args()
@@ -230,10 +239,11 @@ def main():
 
     if DEBUG:
         with open('debug_file_content.txt', 'w') as outfile:
-            outfile.write(data)
+            outfile.write(data.decode())
         debug_print('written data to file: debug_file_content.txt')
 
-    entries = scan(data)
+    entries = scan(data, cross_lists=not options.ignore_cross_lists,
+                         resubmissions=options.show_resubmissions)
     evaluate(entries)
     entries = sort(entries, rating_min=int(options.rating),
             reverse=options.reverse, length=int(options.length))
