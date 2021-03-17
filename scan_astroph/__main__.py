@@ -1,5 +1,6 @@
 from optparse import OptionParser
 
+from .config import AUTHORS, TITLE_KEYWORDS
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
 from .parse import parse_html
@@ -44,7 +45,7 @@ def main():
 
     entries = parse_html(data, cross_lists=not options.ignore_cross_lists,
                          resubmissions=options.show_resubmissions)
-    evaluate_entries(entries)
+    evaluate_entries(entries, keyword_ratings=TITLE_KEYWORDS, author_ratings=AUTHORS)
     entries = sort_entries(entries, rating_min=int(options.rating),
             reverse=options.reverse, length=int(options.length))
     print_entries(entries)
