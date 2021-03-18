@@ -1,12 +1,8 @@
 """Functions related to outputting to terminal"""
+from termcolor import colored
 
-def print_entries(entries):
+def print_entries(entries: list):
     ''' Print all entries'''
-    try:
-        from termcolor import colored
-    except ImportError:
-        def colored(s, *args, **kwargs):
-            return s
     for i, entry in enumerate(entries):
         rating = colored('({:2d})'.format(entry.rating), 'green')
         authors = []
@@ -21,6 +17,7 @@ def print_entries(entries):
             else:
                 authors.append(colored(a, attrs=['underline']))
         authors = colored(', ', attrs=['underline']).join(authors)
+
         title_lines = [[]]
         title_len = 0
         for i, t in enumerate(entry.title):
