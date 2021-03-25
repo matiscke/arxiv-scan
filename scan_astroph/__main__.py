@@ -1,3 +1,4 @@
+import logging
 from argparse import ArgumentParser
 
 from . import __version__
@@ -20,6 +21,7 @@ def parse_cli_arguments() -> tuple:
             help='minimum rating for result list', default=6)
     parser.add_argument('--reverse', dest='reverse',
             help='reverse list', action='store_false', default=True)
+    parser.add_argument('--log', choices=["info", "debug"], default="warning", help="Set loglevel")
     parser.add_argument('--show-resubmissions', action='store_true', default=False)
     parser.add_argument('--ignore-cross-lists', action="store_true", default=False)
     parser.add_argument('--version', action='version',
@@ -28,6 +30,8 @@ def parse_cli_arguments() -> tuple:
 
 def main():
     args = parse_cli_arguments()
+
+    logging.basicConfig(level=getattr(logging, args.log.upper()))
 
     if (args.date == 'new') | (args.date is None):
         address = '{base:s}/new'.format(base=ARXIV_BASE)
