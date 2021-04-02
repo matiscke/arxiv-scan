@@ -56,9 +56,8 @@ def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict)
                 entry.rating += counts * rating
 
         for author, rating in author_ratings.items():
-            author = author.lower()
             for i, a in enumerate(entry.authors):
-                match = re.search(r'\b{}\b'.format(author), a)
+                match = re.search(r'\b{}\b'.format(author), a, flags=re.IGNORECASE)
                 if match:
                     entry.mark_author(i)
                     entry.rating += rating
