@@ -1,18 +1,25 @@
 import logging
 from argparse import ArgumentParser
+import sys
 
 from . import __version__
-from .config import AUTHORS, TITLE_KEYWORDS
+from .config import Config, find_configfile, load_config_legacy_format
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
 from .parse import parse_html
 from .tools import load_html
+from pathlib import Path
 
 ARXIV_BASE = 'https://arxiv.org/list/astro-ph.EP'
 
 def parse_cli_arguments() -> tuple:
     """Definition and parsing of command line arguments"""
     parser = ArgumentParser()
+    parser.add_argument('--config', help="Path to configuration file")
+    parser.add_argument('--default-config', nargs="?", default=False, const=True,
+            help="Write default config to default location (or specified path)")
+    parser.add_argument('--config-convert', nargs="?", default=False, const=True,
+            help="Convert authors and keywords config from legacy format")
     parser.add_argument('-d', '--date', dest='date',
             help='date in format yyyy-mm, or "new", or "recent"', default='new')
     parser.add_argument('-l', '--len', dest='length', type=int,
@@ -33,6 +40,39 @@ def main():
 
     logging.basicConfig(level=getattr(logging, args.log.upper()))
 
+    if args.default_config:
+        if args.default_config is True:
+            path = Path.home() / ".scan_astro-ph.conf"
+        else:
+            path = args.default_config
+        config = Config()
+        config.write(path)
+        print("Written default config to {}".format(path))
+        sys.exit()
+
+    if args.config_convert:
+        if args.config_convert is True:
+            path = Path.home() / ".scan_astro-ph.conf"
+        else:
+            path = args.config_convert
+        config = load_config_legacy_format("keywords.txt", "authors.txt")
+        config.write(path)
+        print("Convert legacy configuration to {}".format(path))
+        sys.exit()
+
+    config = Config()
+    if args.config:
+        configfile = args.config
+    else:
+        try:
+            configfile = find_configfile()
+        except FileNotFoundError:
+            logging.error("Cannot find config file. Check Readme for configuration locations")
+            sys.exit(1)
+
+    config.read(configfile)
+    logging.info("Reading configuration from file '%s'", configfile)
+
     if (args.date == 'new') | (args.date is None):
         address = '{base:s}/new'.format(base=ARXIV_BASE)
         print("querying authors and titles for new submissions (today's listing)")
@@ -50,7 +90,7 @@ def main():
 
     entries = parse_html(data, cross_lists=not args.ignore_cross_lists,
                          resubmissions=args.show_resubmissions)
-    evaluate_entries(entries, keyword_ratings=TITLE_KEYWORDS, author_ratings=AUTHORS)
+    evaluate_entries(entries, keyword_ratings=config.keywords, author_ratings=config.authors)
     entries = sort_entries(entries, rating_min=args.rating,
             reverse=args.reverse, length=args.length)
     print_entries(entries)
