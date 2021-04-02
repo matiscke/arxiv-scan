@@ -3,7 +3,7 @@ scan_astro-ph
 Scan abstract listings on ArXiV's astro-ph (or others) for keywords and favorite authors to distill a list of papers most relevant for *you*.
 Keywords can be typed in manually or be found by ranking word occurrences in a provided file (e.g., a `.bib` file).
 
-The bulk of the code was created by [Robert Glas](https://github.com/rmglas).
+The bulk of the code was created by [Robert Glas](https://github.com/rmglas), with significant contributions by [Simske](https://github.com/Simske).
 
 # Installation
 Requirements: Python >3.5

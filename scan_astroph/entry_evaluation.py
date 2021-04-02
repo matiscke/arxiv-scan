@@ -4,8 +4,9 @@ import re
 
 class Entry(object):
     """This class represents one arxiv entry"""
+
     def __init__(self, number: int, id: str, title: str,
-                       authors: list, abstract: str):
+                 authors: list, abstract: str):
         self.number = int(number)
         self.id = id
         self.title = title
@@ -32,6 +33,7 @@ class Entry(object):
     def mark_author(self, number: int) -> None:
         """Mark author (by given number in author list)"""
         self.author_marks[number] = True
+
 
 def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict) -> list:
     ''' Evaluate entries
@@ -63,6 +65,7 @@ def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict)
 
     return entries
 
+
 def sort_entries(entries: list, rating_min: int, reverse: bool, length: int) -> list:
     ''' Sort entries by rating
 
@@ -76,7 +79,7 @@ def sort_entries(entries: list, rating_min: int, reverse: bool, length: int) -> 
         length = None
 
     # remove entries with low rating
-    entries_filtered = filter(lambda entry : entry.rating >= rating_min, entries)
+    entries_filtered = filter(lambda entry: entry.rating >= rating_min, entries)
     # sort by rating
     results = sorted(entries_filtered, key=lambda x: x.rating, reverse=reverse)
 
