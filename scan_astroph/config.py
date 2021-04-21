@@ -2,6 +2,7 @@
 
 import json
 import os
+from ast import literal_eval
 from configparser import ConfigParser
 from pathlib import Path
 
@@ -19,11 +20,21 @@ class Config:
 
         self._config["keywords"] = {}
         self._config["authors"] = {}
+        self._config["options"] = {
+            "date": "new",
+            "length": -1,
+            "minimum_rating": 6,
+            "reverse_list": False,
+            "show_resubmissions": False,
+            "show_cross_lists": True,
+        }
 
     @property
     def keywords(self) -> dict:
         """Get keywords/rating as dict with type `dict[str,int]`"""
-        return {keyword: int(rating) for keyword, rating in self._config["keywords"].items()}
+        return {
+            keyword: int(rating) for keyword, rating in self._config["keywords"].items()
+        }
 
     def add_keyword(self, keyword: str, rating: int):
         """Add keyword with rating to config"""
@@ -32,7 +43,9 @@ class Config:
     @property
     def authors(self):
         """Get authors/rating as dict with type `dict[str,int]`"""
-        return {author: int(rating) for author, rating in self._config["authors"].items()}
+        return {
+            author: int(rating) for author, rating in self._config["authors"].items()
+        }
 
     def add_author(self, author: str, rating: int):
         """Add author with rating to config"""
@@ -46,6 +59,19 @@ class Config:
         """Write config to file. Will not overwrite existing files if `overwrite` is false"""
         with open(path, "w" if overwrite else "x") as f:
             self._config.write(f)
+
+    def __getitem__(self, key: str):
+        """Get option value from config"""
+        # use literal_eval to convert if its not a str
+        try:
+            return literal_eval(self._config["options"][key])
+        except ValueError:
+            return self._config["options"][key]
+
+    def __setitem__(self, key, value):
+        """Set option if value is not None"""
+        if value is not None:
+            self._config["options"][key] = str(value)
 
 
 def find_configfile():
