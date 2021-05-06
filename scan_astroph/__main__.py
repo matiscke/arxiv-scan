@@ -1,14 +1,15 @@
 import logging
-from argparse import ArgumentParser
 import sys
+from argparse import ArgumentParser
+from pathlib import Path
 
 from . import __version__
-from .config import Config, find_configfile, load_config_legacy_format
+from .config import (Config, configfile_default_location, find_configfile,
+                     load_config_legacy_format)
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
 from .parse import parse_html
 from .tools import load_html
-from pathlib import Path
 
 ARXIV_BASE = 'https://arxiv.org/list/astro-ph.EP'
 
@@ -50,7 +51,7 @@ def main():
     # write default config
     if args.default_config:
         if args.default_config is True:
-            path = Path.home() / ".scan_astro-ph.conf"
+            path = configfile_default_location(mkdir=True)
         else:
             path = args.default_config
         config = Config()
@@ -58,10 +59,10 @@ def main():
         print("Written default config to {}".format(path))
         sys.exit()
 
-    # convert config into new format
+    # convert legacy config into new format
     if args.config_convert:
         if args.config_convert is True:
-            path = Path.home() / ".scan_astro-ph.conf"
+            path = configfile_default_location(mkdir=True)
         else:
             path = args.config_convert
         config = load_config_legacy_format("keywords.txt", "authors.txt")

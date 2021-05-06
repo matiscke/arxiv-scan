@@ -74,10 +74,10 @@ class Config:
             self._config["options"][key] = str(value)
 
 
-def find_configfile():
+def find_configfile() -> Path:
     """Finds location of configuration file"""
     # Check environment variable
-    if "SCAN_ASTRO_PH_CONF" in os.environ:
+    if "SCAN_ASTROPH_CONF" in os.environ:
         return Path(os.path.expandvars(os.environ["SCAN_ASTRO_PH_CONF"]))
 
     # check home directory
@@ -85,16 +85,35 @@ def find_configfile():
     if configpath.is_file():
         return configpath
 
-    # CHECK $XDG_CONFIG_HOME
-    if "XDG_CONFIG_HOME" in os.environ:
-        configpath = Path(os.environ["XDG_CONFIG_HOME"]) / "scan_astro-ph.conf"
-    else:
-        configpath = Path.home() / ".config" / "scan_astro-ph.conf"
+    # check platform specific configuration location
+    configpath = configfile_default_location()
     if configpath.is_file():
         return configpath
-    else:
-        raise FileNotFoundError("Cannot find configuration file")
 
+    raise FileNotFoundError("Could not find scan_astroph.conf. Check Readme for config locations")
+
+def configfile_default_location(mkdir: bool=False) -> Path:
+    """Find platform dependent configfile location
+
+    With `mkdir=True` all parent directories for the config file are created.
+
+    On Linux: `$XDG_CONFIG_HOME/scan_astroph/scan_astroph.conf` (`~/.local/scan_astroph/scan_astroph.conf`)
+    On Windows: `$HOME/Documents/scan_astroph/scan_astroph.conf`
+    On MacOS: `$HOME/Library/Application Support/scan_astroph/scan_astroph.conf`
+
+    For more details check out documentation of appdirs
+    """
+    if sys.platform == "darwin": # MacOS
+        path = Path.home() / "Library" / "Application Support" / "scan_astroph" / "scan_astroph.conf"
+    elif sys.platform == "win32": # Windows
+        path = Path.home() / "Documents" / "scan_astroph" / "scan_astroph.conf"
+    else: # Linux and other Unixes
+        path = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "scan_astroph" / "scan_astroph.conf"
+
+    if mkdir:
+        path.parent.mkdir(parents=True, exist_ok=True)
+
+    return path
 
 def load_config_legacy_format(keywords_path: Path, authors_path: Path) -> Config:
     """Load config from legacy format (seperate JSON files for keywords and authors"""

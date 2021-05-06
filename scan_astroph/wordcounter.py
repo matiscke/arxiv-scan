@@ -5,7 +5,7 @@ from re import findall
 import argparse
 from pathlib import Path
 
-from .config import Config, find_configfile
+from .config import Config, find_configfile, configfile_default_location
 
 
 def _count_words(fname):
@@ -70,7 +70,7 @@ def main():
         try:
             configfile = find_configfile()
         except FileNotFoundError:
-            configfile = Path.home() / ".scan_astro-ph.conf"
+            configfile = configfile_default_location(mkdir=True)
     try:
         config.read(configfile)
     except FileNotFoundError:
