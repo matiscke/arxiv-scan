@@ -4,8 +4,8 @@ from argparse import ArgumentParser
 from pathlib import Path
 
 from . import __version__
-from .config import (Config, configfile_default_location, find_configfile,
-                     load_config_legacy_format)
+from .config import (Config, configfile_default_location, file_editor,
+                     find_configfile, load_config_legacy_format)
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
 from .parse import parse_html
@@ -23,6 +23,8 @@ def parse_cli_arguments() -> tuple:
                         help="Write default config to default location (or specified path)")
     parser.add_argument("--config-convert", nargs="?", default=False, const=True, metavar="/path/to/config",
                         help="Convert authors and keywords config from legacy format")
+    parser.add_argument("--edit", action="store_true",
+                        help="Edit config in default text editor")
     parser.add_argument("-d", "--date", default=None,
                         help='date in format yyyy-mm, or "new", or "recent"')
     parser.add_argument("-l", "--len", dest="length", type=int, default=None,
@@ -69,6 +71,19 @@ def main():
         config.write(path)
         print("Convert legacy configuration to {}".format(path))
         sys.exit()
+
+    # Open config file in text editor
+    if args.edit:
+        try:
+            path = find_configfile()
+        except FileNotFoundError:
+            if input("No config file found. Create at default location? [y/N] ").lower() == "y":
+                path = configfile_default_location(mkdir=True)
+                Config().write(path)
+            else:
+                print("No file to edit. Exiting")
+                sys.exit(1)
+        file_editor(path)
 
     # read config
     config = Config()

@@ -2,6 +2,8 @@
 
 import json
 import os
+import subprocess
+import sys
 from ast import literal_eval
 from configparser import ConfigParser
 from pathlib import Path
@@ -114,6 +116,22 @@ def configfile_default_location(mkdir: bool=False) -> Path:
         path.parent.mkdir(parents=True, exist_ok=True)
 
     return path
+
+
+def file_editor(path: Path):
+    """Open file in default text editor
+
+    Opens in first editor set in environment variables $VISUAL or $EDITOR,
+    otherwise defaults to `vi` on unixes and Notepad on Windows.
+    """
+    if "VISUAL" in os.environ:
+        subprocess.run((os.environ["VISUAL"], path))
+    elif "EDITOR" in os.environ:
+        subprocess.run((os.environ["EDITOR"], path))
+    elif sys.platform == "win32":
+        subprocess.run(["notepad.exe", path])
+    else:
+        subprocess.run(("vi", path))
 
 def load_config_legacy_format(keywords_path: Path, authors_path: Path) -> Config:
     """Load config from legacy format (seperate JSON files for keywords and authors"""
