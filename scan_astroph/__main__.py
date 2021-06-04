@@ -31,7 +31,7 @@ def parse_cli_arguments() -> tuple:
                         help="length of result list, all is -1")
     parser.add_argument("-v", "--rating", type=int, default=None,
                         help="minimum rating for result list")
-    parser.add_argument("--reverse", action="store_false", default=None,
+    parser.add_argument("--reverse", action="store_true", default=None,
                         help="reverse list (lowest ranked paper on top)")
     parser.add_argument("--show-resubmissions", action="store_true", default=None,
                         help="Include resubmissions")
