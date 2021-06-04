@@ -1,6 +1,5 @@
 """Definition of class Entry and all evaluation related functions"""
 import re
-import numpy as np
 
 
 class Entry(object):
@@ -80,6 +79,6 @@ def sort_entries(entries: list, rating_min: int, reverse: bool, length: int) -> 
     # remove entries with low rating
     entries_filtered = filter(lambda entry: entry.rating >= rating_min, entries)
     # sort by rating
-    results = sorted(entries_filtered, key=lambda x: x.rating, reverse=np.invert(reverse))
+    results = sorted(entries_filtered, key=lambda x: x.rating, reverse=not reverse)
 
     return results[:length]
