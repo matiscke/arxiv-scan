@@ -1,3 +1,4 @@
+import datetime
 import logging
 import sys
 from argparse import ArgumentParser
@@ -8,10 +9,7 @@ from .config import (Config, configfile_default_location, file_editor,
                      find_configfile, load_config_legacy_format)
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
-from .parse import parse_html
-from .tools import load_html
-
-ARXIV_BASE = 'https://arxiv.org/list/astro-ph.EP'
+from .parse import get_entries
 
 
 def parse_cli_arguments() -> tuple:
@@ -31,6 +29,8 @@ def parse_cli_arguments() -> tuple:
                         help="length of result list, all is -1")
     parser.add_argument("-v", "--rating", type=int, default=None,
                         help="minimum rating for result list")
+    parser.add_argument("-c", "--categories", default=None,
+                        help="arXiv subjects to scan, comma seperated list")
     parser.add_argument("--reverse", action="store_true", default=None,
                         help="reverse list (lowest ranked paper on top)")
     parser.add_argument("--show-resubmissions", action="store_true", default=None,
@@ -103,6 +103,7 @@ def main():
     config["date"] = args.date
     config["length"] = args.length
     config["minimum_rating"] = args.rating
+    config["categories"] = args.categories
     config["reverse_list"] = args.reverse
     config["show_resubmissions"] = args.show_resubmissions
     config["show_cross_lists"] = (
@@ -111,24 +112,16 @@ def main():
 
     # parse date string
     if config["date"] == "new" or config["date"] is None:
-        address = '{base:s}/new'.format(base=ARXIV_BASE)
-        print("querying authors and titles for new submissions (today's listing)")
+        cutoff_date = datetime.datetime.now() - datetime.timedelta(days=2)
     elif config["date"] == "recent":
-        address = '{base:s}/recent'.format(base=ARXIV_BASE)
-        print('querying authors and titles for recent submissions')
+        raise NotImplementedError("currently on date 'new' is allowed")
     else:
-        year, month = args.date.split('-')
-        year = year[2:4] if len(year) == 4 else year
-        address = '{base:s}/{year:2.2s}{month:2.2s}?show=3000'.format(
-                base=ARXIV_BASE, year=year, month=month)
-        print('querying authors and titles for listings in {:2.2s}/{:2.2s}'.format(month, year))
+        raise NotImplementedError("currently on date 'new' is allowed")
 
-    data = load_html(address)
-
-    entries = parse_html(
-        data,
+    entries = get_entries(
+        config["categories"].split(","), cutoff_date=cutoff_date,
         cross_lists=config["show_cross_lists"],
-        resubmissions=config["show_resubmissions"],
+        resubmissions=config["show_resubmissions"]
     )
     evaluate_entries(
         entries, keyword_ratings=config.keywords, author_ratings=config.authors

@@ -16,7 +16,6 @@ class Entry(object):
         self.authors = authors
         self.abstract = abstract
         self.category = category
-        self.rating = 0
         self.date_submitted = date_submitted
         self.date_updated = date_updated
 
@@ -63,6 +62,7 @@ class Entry(object):
         Returns:
             int: rating for this entry
         """
+        self.rating = 0
         for keyword, rating in keyword_ratings.items():
             keyword = keyword.lower()
             counts = self.title.lower().count(keyword)

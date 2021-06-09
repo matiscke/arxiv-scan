@@ -23,6 +23,7 @@ class Config:
         self._config["keywords"] = {}
         self._config["authors"] = {}
         self._config["options"] = {
+            "categories": "astro-ph.EP",
             "date": "new",
             "length": -1,
             "minimum_rating": 6,
