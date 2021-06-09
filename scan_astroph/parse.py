@@ -46,7 +46,7 @@ def get_entries(
 
     sortby = "lastUpdatedDate" if resubmissions else "submittedDate"
 
-    category_str = ",".join(categories)
+    search_query = "+OR+".join(f"cat:{cat}" for cat in categories)
 
     entries = []
     # Extract entries, make multiple requests if more than max_results entries
@@ -54,11 +54,13 @@ def get_entries(
     finished = False
     while not finished:
         feed = feedparser.parse(
-            "https://export.arxiv.org/api/query?search_query="
-            f"cat:{category_str}&sortBy={sortby}&sortOrder=descending"
+            f"https://export.arxiv.org/api/query?search_query={search_query}"
+            f"&sortBy={sortby}&sortOrder=descending"
             f"&start={start}&max_results={max_results}"
         )
 
+        if len(feed.entries) == 0:
+            break
         for feedentry in feed.entries:
             entry = atom2entry(feedentry)
             # stop if cutoff date is reached

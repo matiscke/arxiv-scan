@@ -10,6 +10,7 @@ from .config import (Config, configfile_default_location, file_editor,
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
 from .parse import get_entries
+from .categories import category_map
 
 
 def parse_cli_arguments() -> tuple:
@@ -113,13 +114,19 @@ def main():
     # parse date string
     if config["date"] == "new" or config["date"] is None:
         cutoff_date = datetime.datetime.now() - datetime.timedelta(days=2)
+        cutoff_date = datetime.datetime(2021,6,7,6)
     elif config["date"] == "recent":
         raise NotImplementedError("currently on date 'new' is allowed")
     else:
         raise NotImplementedError("currently on date 'new' is allowed")
 
+    # parse categories
+    categories = config["categories"].split(",")
+    for category in categories:
+        categories.extend(category_map.get(category, ()))
+
     entries = get_entries(
-        config["categories"].split(","), cutoff_date=cutoff_date,
+        categories, cutoff_date=cutoff_date,
         cross_lists=config["show_cross_lists"],
         resubmissions=config["show_resubmissions"]
     )
