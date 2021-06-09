@@ -1,20 +1,37 @@
 """Definition of class Entry and all evaluation related functions"""
 import re
+from datetime import datetime
 
 
 class Entry(object):
     """This class represents one arxiv entry"""
 
-    def __init__(self, number: int, id: str, title: str,
-                 authors: list, abstract: str):
-        self.number = int(number)
+    def __init__(self, id: str, title: str,
+                 authors: list, abstract: str, category: str = "",
+                 date_submitted: datetime = None,
+                 date_updated: datetime = None,
+                 number: int = None):
         self.id = id
         self.title = title
         self.authors = authors
         self.abstract = abstract
+        self.category = category
         self.rating = 0
+        self.date_submitted = date_submitted
+        self.date_updated = date_updated
+
         self.title_marks = []
         self.author_marks = [False] * len(self.authors)
+        self.rating = None
+
+    def __repr__(self) -> str:
+        return (
+            f"{type(self).__name__}(\n    id={self.id!r},\n    title={self.title!r},\n    "
+            f"authors={self.authors!r},\n    abstract={self.abstract!r},\n    "
+            f"category={self.category!r},\n    "
+            f"date_submitted={self.date_submitted!r},\n    date_updated={self.date_updated!r}"
+            "\n)"
+        )
 
     def mark_title_position(self, position: int) -> None:
         """Mark title at given position"""
@@ -34,36 +51,38 @@ class Entry(object):
         """Mark author (by given number in author list)"""
         self.author_marks[number] = True
 
+    def evaluate(self, keyword_ratings: dict, author_ratings: dict) -> int:
+        """Evaluate entry
 
-def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict) -> list:
-    ''' Evaluate entries
+        Rate entries according to keywords and author list.
+        This sets the rating attribute and marks title and marks title words and authors.
 
-    Rate entries according to keywords and author list.
-    Args:
-        entries (list[Entry]): entries to evaluate. Entry.rating will be modified
-        keywords (dict): dict with keywords as keys and rating as value
-        authors (dict): dict with authors as keys and rating as value
-
-    Returns:
-        list[Entry]: input entries with rating attached (same object as input list)
-    '''
-    for entry in entries:
+        Args:
+            keywords (dict): dict with keywords as keys and rating as value
+            authors (dict): dict with authors as keys and rating as value
+        Returns:
+            int: rating for this entry
+        """
         for keyword, rating in keyword_ratings.items():
             keyword = keyword.lower()
-            counts = entry.title.lower().count(keyword)
+            counts = self.title.lower().count(keyword)
             if counts > 0:
-                entry.mark_title_keyword(keyword)
-                entry.rating += counts * rating
+                self.mark_title_keyword(keyword)
+                self.rating += counts * rating
 
         for author, rating in author_ratings.items():
-            for i, a in enumerate(entry.authors):
+            for i, a in enumerate(self.authors):
                 match = re.search(r'\b{}\b'.format(author), a, flags=re.IGNORECASE)
                 if match:
-                    entry.mark_author(i)
-                    entry.rating += rating
+                    self.mark_author(i)
+                    self.rating += rating
 
-    return entries
+        return self.rating
 
+def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict) -> list:
+    """Evaluate all entries in list"""
+    for entry in entries:
+        entry.evaluate(keyword_ratings, author_ratings)
 
 def sort_entries(entries: list, rating_min: int, reverse: bool, length: int) -> list:
     ''' Sort entries by rating
