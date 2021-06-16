@@ -2,14 +2,13 @@ import datetime
 import logging
 import sys
 from argparse import ArgumentParser
-from pathlib import Path
 
 from . import __version__
 from .config import (Config, configfile_default_location, file_editor,
                      find_configfile, load_config_legacy_format)
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
-from .parse import get_entries
+from .parse import get_entries, submission_window_start
 from .categories import category_map
 
 
@@ -113,12 +112,20 @@ def main():
 
     # parse date string
     if config["date"] == "new" or config["date"] is None:
-        cutoff_date = datetime.datetime.now() - datetime.timedelta(days=2)
-        cutoff_date = datetime.datetime(2021,6,7,6)
+        cutoff_date = submission_window_start(datetime.datetime.now().astimezone())
     elif config["date"] == "recent":
-        raise NotImplementedError("currently on date 'new' is allowed")
+        cutoff_date = submission_window_start(
+            datetime.datetime.now().astimezone() - datetime.timedelta(days=6)
+        )
+    elif isinstance(config["date"], int):
+        cutoff_date = (
+            datetime.datetime.now().astimezone().replace(hour=0, minute=0,second=0, microsecond=0)
+            - datetime.timedelta(days=config["date"])
+        )
     else:
-        raise NotImplementedError("currently on date 'new' is allowed")
+        raise ValueError("Couldn't parse parameter 'date' from argument or config file")
+
+    print(f"Getting Submissions since {cutoff_date}")
 
     # parse categories
     categories = config["categories"].split(",")
