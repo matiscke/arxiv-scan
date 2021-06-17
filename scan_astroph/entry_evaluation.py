@@ -63,13 +63,18 @@ class Entry(object):
             int: rating for this entry
         """
         self.rating = 0
+        # find keywords in title and abstract
         for keyword, rating in keyword_ratings.items():
             keyword = keyword.lower()
+            # find and mark keyword in title
             counts = self.title.lower().count(keyword)
             if counts > 0:
                 self.mark_title_keyword(keyword)
                 self.rating += counts * rating
+            # find keyword in abstract
+            self.rating += self.abstract.lower().count(keyword) * rating
 
+        # find authors
         for author, rating in author_ratings.items():
             for i, a in enumerate(self.authors):
                 match = re.search(r'\b{}\b'.format(author), a, flags=re.IGNORECASE)
