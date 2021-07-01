@@ -25,7 +25,8 @@ then just run `scan_astro-ph` (or `python -m scan_astroph`) to get the relevant 
 
 ## Command line reference
 ```
-usage: scan_astro-ph [-h] [--config /path/to/config] [--default-config [/path/to/config]] [--config-convert [/path/to/config]] [--edit] [-d DATE] [-l LENGTH] [-v RATING] [--reverse] [--show-resubmissions] [--ignore-cross-lists] [--log {info,debug}] [--version]
+usage: astroph-scan [-h] [--config /path/to/config] [--default-config [/path/to/config]] [--config-convert [/path/to/config]] [--edit] [-d DATE] [-l LENGTH] [-v RATING] [-c CATEGORIES] [--reverse] [--show-resubmissions] [--ignore-cross-lists] [--ignore-abstract]
+                    [--log {info,debug}] [--version]
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -41,9 +42,12 @@ optional arguments:
                         length of result list, all is -1
   -v RATING, --rating RATING
                         minimum rating for result list
+  -c CATEGORIES, --categories CATEGORIES
+                        arXiv subjects to scan, comma seperated list
   --reverse             reverse list (lowest ranked paper on top)
   --show-resubmissions  Include resubmissions
   --ignore-cross-lists  Include cross-lists
+  --ignore-abstract     Ignore abstract in rating
   --log {info,debug}    Set loglevel
   --version             show program's version number and exit
 ```
@@ -55,6 +59,8 @@ default text editor.
 
 Alternatively create a default configfile with `scan_astro-ph --default-config`, and edit it manually.
 
+arXiv topics can be selected with the `categories` option, it accepts a comma-separated list of topics.
+[List of topics](https://arxiv.org/category_taxonomy)
 ## Configuration format:
 ```ini
 [authors]
@@ -70,7 +76,9 @@ planet = 2
 habitable = 3
 
 [options]
-# other optional options (can also be set on CLI)
+# other options (can also be set on CLI)
+# default is used if ommited
+categories = astro-ph.EP
 date = new
 length = -1
 minimum_rating = 6
