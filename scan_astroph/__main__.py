@@ -37,6 +37,8 @@ def parse_cli_arguments() -> tuple:
                         help="Include resubmissions")
     parser.add_argument("--ignore-cross-lists", action="store_true", default=None,
                         help="Include cross-lists")
+    parser.add_argument("--ignore-abstract", action="store_true",
+                        help="Ignore abstract in rating")
     parser.add_argument("--log", choices=["info", "debug"], default="warning",
                         help="Set loglevel")
     parser.add_argument("--version", action="version",
@@ -137,9 +139,8 @@ def main():
         cross_lists=config["show_cross_lists"],
         resubmissions=config["show_resubmissions"]
     )
-    evaluate_entries(
-        entries, keyword_ratings=config.keywords, author_ratings=config.authors
-    )
+    evaluate_entries(entries, keyword_ratings=config.keywords,
+                     author_ratings=config.authors, rate_abstract=not args.ignore_abstract)
     entries = sort_entries(
         entries,
         rating_min=config["minimum_rating"],

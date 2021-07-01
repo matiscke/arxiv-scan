@@ -50,7 +50,8 @@ class Entry(object):
         """Mark author (by given number in author list)"""
         self.author_marks[number] = True
 
-    def evaluate(self, keyword_ratings: dict, author_ratings: dict) -> int:
+    def evaluate(self, keyword_ratings: dict, author_ratings: dict,
+                       rate_abstract: bool=True) -> int:
         """Evaluate entry
 
         Rate entries according to keywords and author list.
@@ -72,7 +73,8 @@ class Entry(object):
                 self.mark_title_keyword(keyword)
                 self.rating += counts * rating
             # find keyword in abstract
-            self.rating += self.abstract.lower().count(keyword) * rating
+            if rate_abstract:
+                self.rating += self.abstract.lower().count(keyword) * rating
 
         # find authors
         for author, rating in author_ratings.items():
@@ -84,10 +86,10 @@ class Entry(object):
 
         return self.rating
 
-def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict) -> list:
+def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict, rate_abstract: bool=True) -> list:
     """Evaluate all entries in list"""
     for entry in entries:
-        entry.evaluate(keyword_ratings, author_ratings)
+        entry.evaluate(keyword_ratings, author_ratings, rate_abstract)
 
 def sort_entries(entries: list, rating_min: int, reverse: bool, length: int) -> list:
     ''' Sort entries by rating
