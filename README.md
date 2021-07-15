@@ -25,19 +25,25 @@ then just run `scan_astro-ph` (or `python -m scan_astroph`) to get the relevant 
 
 ## Command line reference
 ```
-usage: astroph-scan [-h] [--config /path/to/config] [--default-config [/path/to/config]] [--config-convert [/path/to/config]] [--edit] [-d DATE] [-l LENGTH] [-v RATING] [-c CATEGORIES] [--reverse] [--show-resubmissions] [--ignore-cross-lists] [--ignore-abstract]
-                    [--log {info,debug}] [--version]
+usage: astroph-scan [-h] [--config /path/to/config]
+                    [--default-config [/path/to/config]]
+                    [--config-convert [/path/to/config]] [--edit] [-d DATE]
+                    [-l LENGTH] [-v RATING] [-c CATEGORIES] [--reverse]
+                    [--show-resubmissions] [--ignore-cross-lists]
+                    [--ignore-abstract] [--log {info,debug}] [--version]
 
 optional arguments:
   -h, --help            show this help message and exit
   --config /path/to/config
                         Path to configuration file (check README for defaults)
   --default-config [/path/to/config]
-                        Write default config to default location (or specified path)
+                        Write default config to default location (or specified
+                        path)
   --config-convert [/path/to/config]
                         Convert authors and keywords config from legacy format
   --edit                Edit config in default text editor
-  -d DATE, --date DATE  date in format yyyy-mm, or "new", or "recent"
+  -d DATE, --date DATE  "new", or "recent", number of days in the past, "YYYY-
+                        MM" or "YYYY-MM-DD". Defaults to "new"
   -l LENGTH, --len LENGTH
                         length of result list, all is -1
   -v RATING, --rating RATING

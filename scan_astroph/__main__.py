@@ -24,7 +24,7 @@ def parse_cli_arguments() -> tuple:
     parser.add_argument("--edit", action="store_true",
                         help="Edit config in default text editor")
     parser.add_argument("-d", "--date", default=None,
-                        help='date in format yyyy-mm, or "new", or "recent"')
+                        help='"new", or "recent", number of days in the past, "YYYY-MM" or "YYYY-MM-DD". Defaults to "new"')
     parser.add_argument("-l", "--len", dest="length", type=int, default=None,
                         help="length of result list, all is -1")
     parser.add_argument("-v", "--rating", type=int, default=None,
@@ -125,7 +125,13 @@ def main():
             - datetime.timedelta(days=config["date"])
         )
     else:
-        raise ValueError("Couldn't parse parameter 'date' from argument or config file")
+        try:
+            cutoff_date = datetime.datetime.strptime(config["date"], "%Y-%m").astimezone()
+        except ValueError:
+            try:
+                cutoff_date = datetime.datetime.strptime(config["date"], "%Y-%m-%d").astimezone()
+            except ValueError:
+                raise ValueError("Couldn't parse parameter 'date' from argument or config file") from None
 
     print(f"Getting Submissions since {cutoff_date}")
 
