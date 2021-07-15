@@ -11,6 +11,13 @@ def linebreak_fix(text: str):
     """Replace linebreaks and indenting with single space"""
     return " ".join(line.strip() for line in text.split("\n"))
 
+def datetime_fromisoformat(datestr: str):
+    """Convert iso formatted datetime string to datetime object
+
+    This is only needed for compatibility, as datetime.fromisoformat()
+    was added in Python 3.7
+    """
+    return datetime.strptime(datestr, "%Y-%m-%dT%H:%M:%S")
 
 def atom2entry(entry: feedparser.util.FeedParserDict) -> Entry:
     """Convert entry from API object to Entry object"""
@@ -20,8 +27,8 @@ def atom2entry(entry: feedparser.util.FeedParserDict) -> Entry:
         authors=[author["name"] for author in entry.authors],
         abstract=linebreak_fix(entry.summary),
         category=entry.arxiv_primary_category["term"],
-        date_submitted=pytz.utc.localize(datetime.fromisoformat(entry.published[:-1])),
-        date_updated=pytz.utc.localize(datetime.fromisoformat(entry.updated[:-1])),
+        date_submitted=pytz.utc.localize(datetime_fromisoformat(entry.published[:-1])),
+        date_updated=pytz.utc.localize(datetime_fromisoformat(entry.updated[:-1])),
     )
 
 
