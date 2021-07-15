@@ -68,7 +68,7 @@ class Config:
         # use literal_eval to convert if its not a str
         try:
             return literal_eval(self._config["options"][key])
-        except ValueError:
+        except (ValueError, SyntaxError):
             return self._config["options"][key]
 
     def __setitem__(self, key, value):
