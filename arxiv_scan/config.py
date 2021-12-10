@@ -80,11 +80,11 @@ class Config:
 def find_configfile() -> Path:
     """Finds location of configuration file"""
     # Check environment variable
-    if "SCAN_ASTROPH_CONF" in os.environ:
-        return Path(os.path.expandvars(os.environ["SCAN_ASTRO_PH_CONF"]))
+    if "ARXIV_SCAN_CONF" in os.environ:
+        return Path(os.path.expandvars(os.environ["ARXIV_SCAN_CONF"]))
 
     # check home directory
-    configpath = Path.home() / ".scan_astro-ph.conf"
+    configpath = Path.home() / ".arxiv-scan.conf"
     if configpath.is_file():
         return configpath
 
@@ -93,25 +93,25 @@ def find_configfile() -> Path:
     if configpath.is_file():
         return configpath
 
-    raise FileNotFoundError("Could not find scan_astroph.conf. Check Readme for config locations")
+    raise FileNotFoundError("Could not find arxiv-scan.conf. Check Readme for config locations")
 
 def configfile_default_location(mkdir: bool=False) -> Path:
     """Find platform dependent configfile location
 
     With `mkdir=True` all parent directories for the config file are created.
 
-    On Linux: `$XDG_CONFIG_HOME/scan_astroph/scan_astroph.conf` (`~/.local/scan_astroph/scan_astroph.conf`)
-    On Windows: `$HOME/Documents/scan_astroph/scan_astroph.conf`
-    On MacOS: `$HOME/Library/Application Support/scan_astroph/scan_astroph.conf`
+    On Linux: `$XDG_CONFIG_HOME/arxiv-scan/arxiv-scan.conf` (`~/.config/arxiv-scan/arxiv-scan.conf`)
+    On Windows: `$HOME/Documents/arxiv-scan/arxiv-scan.conf`
+    On MacOS: `$HOME/Library/Application Support/arxiv-scan/arxiv-scan.conf`
 
     For more details check out documentation of appdirs
     """
     if sys.platform == "darwin": # MacOS
-        path = Path.home() / "Library" / "Application Support" / "scan_astroph" / "scan_astroph.conf"
+        path = Path.home() / "Library" / "Application Support" / "arxiv-scan" / "arxiv-scan.conf"
     elif sys.platform == "win32": # Windows
-        path = Path.home() / "Documents" / "scan_astroph" / "scan_astroph.conf"
+        path = Path.home() / "Documents" / "arxiv-scan" / "arxiv-scan.conf"
     else: # Linux and other Unixes
-        path = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "scan_astroph" / "scan_astroph.conf"
+        path = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "arxiv-scan" / "arxiv-scan.conf"
 
     if mkdir:
         path.parent.mkdir(parents=True, exist_ok=True)

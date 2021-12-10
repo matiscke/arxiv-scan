@@ -1,9 +1,9 @@
-# scan_astroph configuration files
+# legacy configuration files
 authors.txt
 keywords.txt
 
 # Auto generated version file
-scan_astroph/_version.py
+arxiv_scan/_version.py
 
 # Python
 *.py[cod]

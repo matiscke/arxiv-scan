@@ -1,49 +1,47 @@
-scan_astro-ph
+arxiv-scan
 =============
-Scan abstract listings on ArXiV's astro-ph (or others) for keywords and favorite authors to distill a list of papers most relevant for *you*.
+Scan abstract listings on ArXiV for keywords and favorite authors in your categories to distill a list of papers most relevant for *you*.
 Keywords can be typed in manually or be found by ranking word occurrences in a provided file (e.g., a `.bib` file).
 
-*scan_astro-ph* was created by [Robert Glas](https://github.com/rmglas), [Simeon Doetsch](https://github.com/Simske), and [Martin Schlecker](https://github.com/matiscke).
+*arxiv-scan* was created by [Robert Glas](https://github.com/rmglas), [Simeon Doetsch](https://github.com/Simske), and [Martin Schlecker](https://github.com/matiscke).
 
 # Installation
 Requirements: Python >3.5
 
-These scripts can be installed with pip:
+These scripts can be installed with pip (or with [pipx]() for an isolated environment):
 ```
-pip install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=scan_astroph
+pip install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=arxiv_scan
 ```
 Depending on your Python installation, you might need one of the following:
 ```
-pip3 install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=scan_astroph
-python3 -m pip install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=scan_astroph
+pip3 install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=arxiv_scan
+python3 -m pip install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=arxiv_scan
 ```
 
 # Usage
-## Query today's astro-ph listing for relevant papers
+## Query today's arXiV listing for relevant papers
 First setup your keywords and authors (see configuration section),
-then just run `scan_astro-ph` (or `python -m scan_astroph`) to get the relevant listings.
+then just run `arxiv-scan` (or `python -m arxiv_scan`) to get the relevant listings.
 
 ## Command line reference
 ```
-usage: astroph-scan [-h] [--config /path/to/config]
-                    [--default-config [/path/to/config]]
-                    [--config-convert [/path/to/config]] [--edit] [-d DATE]
-                    [-l LENGTH] [-v RATING] [-c CATEGORIES] [--reverse]
-                    [--show-resubmissions] [--ignore-cross-lists]
-                    [--ignore-abstract] [--log {info,debug}] [--version]
+usage: arxiv-scan [-h] [--config /path/to/config] [--default-config [/path/to/config]]
+                  [--config-convert [/path/to/config]] [--edit] [-d DATE] [-l LENGTH]
+                  [-v RATING] [-c CATEGORIES] [--reverse] [--show-resubmissions]
+                  [--ignore-cross-lists] [--ignore-abstract] [--log {info,debug}]
+                  [--version]
 
 optional arguments:
   -h, --help            show this help message and exit
   --config /path/to/config
                         Path to configuration file (check README for defaults)
   --default-config [/path/to/config]
-                        Write default config to default location (or specified
-                        path)
+                        Write default config to default location (or specified path)
   --config-convert [/path/to/config]
                         Convert authors and keywords config from legacy format
   --edit                Edit config in default text editor
-  -d DATE, --date DATE  "new", or "recent", number of days in the past, "YYYY-
-                        MM" or "YYYY-MM-DD". Defaults to "new"
+  -d DATE, --date DATE  "new", or "recent", number of days in the past, "YYYY-MM" or
+                        "YYYY-MM-DD". Defaults to "new"
   -l LENGTH, --len LENGTH
                         length of result list, all is -1
   -v RATING, --rating RATING
@@ -60,10 +58,10 @@ optional arguments:
 # Configuration
 In the configuration file all the keywords and authors have to be set, as well as other optional configuration.
 
-The easiest way to get started is to run `scan_astro-ph --edit`, this will open the configuration file in the
+The easiest way to get started is to run `arxiv-scan --edit`, this will open the configuration file in the
 default text editor.
 
-Alternatively create a default configfile with `scan_astro-ph --default-config`, and edit it manually.
+Alternatively create a default configfile with `arxiv-scan --default-config`, and edit it manually.
 
 arXiv topics can be selected with the `categories` option, it accepts a comma-separated list of topics.
 [List of topics](https://arxiv.org/category_taxonomy)
@@ -97,19 +95,19 @@ show_cross_lists = True
 - Run `scan_astro-ph.wordcounter file_to_scan` (or `python -m scan_astroph.wordcounter file_to_scan`).
 It scans the text file and extracts words with 4-12 characters from it, sorted by occurrence in the file.
 - You will be asked to rank these suggested keywords. For each word shown, press 'Enter' to reject it or provide an integer rating, e.g., from 1 to 5 (higher=more relevant). Conclude by pressing `C`.
-- Manually insert particularly important authors into the config file (e.g. with `scan_astro-ph --edit`)
+- Manually insert particularly important authors into the config file (e.g. with `arxiv-scan --edit`)
 
 ## Configuration locations:
-`scan_astro-ph` searches the these paths for the config file, and loads the first found:
-- from environment variable: `$SCAN_ASTRO_PH_CONF`
-- from home directory: `~/.scan_astroph.conf`
+`arxiv-scan` searches the these paths for the config file, and loads the first found:
+- from environment variable: `$ARXIV_SCAN_CONF`
+- from home directory: `~/.arxiv-scan.conf`
 - default path (platform dependent):
-  - on Linux / Unix (except MacOS): `$XDG_CONFIG_HOME/scan_astroph/scan_astroph.conf` (`XDG_CONFIG_HOME` defaults to `~/.config`)
-  - on MacOS: `~/Library/Application Support/scan_astroph/scan_astroph.conf`
-  - on Windows: `$HOME/Documents/scan_astroph/scan_astroph.conf`
+  - on Linux / Unix (except MacOS): `$XDG_CONFIG_HOME/arxiv-scan/arxiv-scan.conf` (`XDG_CONFIG_HOME` defaults to `~/.config`)
+  - on MacOS: `~/Library/Application Support/arxiv-scan/arxiv-scan.conf`
+  - on Windows: `$HOME/Documents/arxiv-scan/arxiv-scan.conf`
 
 # Feedback
-All feedback, including bug reports, feature requests, pull requests, etc., is welcome. `scan_astro-ph` is being actively developed in an open repository; if you have any trouble please raise an [issue](https://github.com/matiscke/scan_astro-ph/issues/new).
+All feedback, including bug reports, feature requests, pull requests, etc., is welcome. `arxiv-scan` is being actively developed in an open repository; if you have any trouble please raise an [issue](https://github.com/matiscke/scan_astro-ph/issues/new).
 
 ---------------------
 License: [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
