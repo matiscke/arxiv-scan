@@ -26,7 +26,7 @@ class Config:
             "categories": "astro-ph.EP",
             "date": "new",
             "length": -1,
-            "minimum_rating": 6,
+            "minimum_rating": 10,
             "reverse_list": False,
             "show_resubmissions": False,
             "show_cross_lists": True,

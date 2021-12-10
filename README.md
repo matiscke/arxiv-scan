@@ -49,7 +49,7 @@ optional arguments:
   -v RATING, --rating RATING
                         minimum rating for result list
   -c CATEGORIES, --categories CATEGORIES
-                        arXiv subjects to scan, comma seperated list
+                        arXiv subjects to scan, comma separated list
   --reverse             reverse list (lowest ranked paper on top)
   --show-resubmissions  Include resubmissions
   --ignore-cross-lists  Include cross-lists
@@ -87,7 +87,7 @@ habitable = 3
 categories = astro-ph.EP
 date = new
 length = -1
-minimum_rating = 6
+minimum_rating = 10 
 reverse_list = False
 show_resubmissions = False
 show_cross_lists = True
