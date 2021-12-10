@@ -3,7 +3,7 @@ scan_astro-ph
 Scan abstract listings on ArXiV's astro-ph (or others) for keywords and favorite authors to distill a list of papers most relevant for *you*.
 Keywords can be typed in manually or be found by ranking word occurrences in a provided file (e.g., a `.bib` file).
 
-The bulk of the code was created by [Robert Glas](https://github.com/rmglas), with significant contributions by [Simske](https://github.com/Simske).
+*scan_astro-ph* was created by [Robert Glas](https://github.com/rmglas), [Simeon Doetsch](https://github.com/Simske), and [Martin Schlecker](https://github.com/matiscke).
 
 # Installation
 Requirements: Python >3.5
@@ -93,9 +93,9 @@ show_resubmissions = False
 show_cross_lists = True
 ```
 
-## Automatically find keywords with `scan_astro-ph.wordcounter`:
+## Automatically extract keywords from a file (e.g. one with bibtex entries):
 - Run `scan_astro-ph.wordcounter file_to_scan` (or `python -m scan_astroph.wordcounter file_to_scan`).
-It scan the text file and extract words with 4-12 characters from it, sorted by occurrence in the file.
+It scans the text file and extracts words with 4-12 characters from it, sorted by occurrence in the file.
 - You will be asked to rank these suggested keywords. For each word shown, press 'Enter' to reject it or provide an integer rating, e.g., from 1 to 5 (higher=more relevant). Conclude by pressing `C`.
 - Manually insert particularly important authors into the config file (e.g. with `scan_astro-ph --edit`)
 
