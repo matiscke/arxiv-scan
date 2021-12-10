@@ -68,11 +68,10 @@ def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict)
 def sort_entries(entries: list, rating_min: int, reverse: bool, length: int) -> list:
     ''' Sort entries by rating
 
-    Only entries with rating >= rating_min are
-    listed, and the list is at maximum length
-    entries long.
-    If reverse is True, the entries are reversed
-    (after cutting the list to length entries).
+    Only entries with rating >= rating_min are listed, and the list is at
+    maximum length entries long. If reverse is True, the entries are reversed
+    (after cutting the list to length entries). Note that the default order
+    is most relevant paper on top.
     '''
     if length < 0:
         length = None
@@ -80,6 +79,6 @@ def sort_entries(entries: list, rating_min: int, reverse: bool, length: int) -> 
     # remove entries with low rating
     entries_filtered = filter(lambda entry: entry.rating >= rating_min, entries)
     # sort by rating
-    results = sorted(entries_filtered, key=lambda x: x.rating, reverse=reverse)
+    results = sorted(entries_filtered, key=lambda x: x.rating, reverse=not reverse)
 
     return results[:length]
