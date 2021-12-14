@@ -6,16 +6,16 @@ Keywords can be typed in manually or be found by ranking word occurrences in a p
 *arxiv-scan* was created by [Robert Glas](https://github.com/rmglas), [Simeon Doetsch](https://github.com/Simske), and [Martin Schlecker](https://github.com/matiscke).
 
 # Installation
-Requirements: Python >3.5
+Requirements: Python >=3.5
 
-These scripts can be installed with pip (or with [pipx]() for an isolated environment):
+These scripts can be installed with pip (or with [pipx](https://pypa.github.io/pipx/) for an isolated environment):
 ```
-pip install --upgrade git+https://github.com/matiscke/arxiv-scan.git
+pip install --upgrade arxiv-scan
 ```
 Depending on your Python installation, you might need one of the following:
 ```
-pip3 install --upgrade git+https://github.com/matiscke/arxiv-scan.git
-python3 -m pip install --upgrade git+https://github.com/matiscke/arxiv-scan
+pip3 install --upgrade arxiv-scan
+python3 -m pip install --upgrade arxiv-scan
 ```
 
 # Usage
