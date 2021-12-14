@@ -39,3 +39,5 @@ def print_entries(entries: list):
         print('     {authors:s}'.format(authors=authors))
         for line in title_lines:
             print('     {title:s}'.format(title=line))
+
+        print(f"     submitted {entry.date_submitted} on {entry.category}")

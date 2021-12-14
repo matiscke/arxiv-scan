@@ -23,9 +23,10 @@ class Config:
         self._config["keywords"] = {}
         self._config["authors"] = {}
         self._config["options"] = {
+            "categories": "astro-ph.EP",
             "date": "new",
             "length": -1,
-            "minimum_rating": 6,
+            "minimum_rating": 10,
             "reverse_list": False,
             "show_resubmissions": False,
             "show_cross_lists": True,
@@ -67,7 +68,7 @@ class Config:
         # use literal_eval to convert if its not a str
         try:
             return literal_eval(self._config["options"][key])
-        except ValueError:
+        except (ValueError, SyntaxError):
             return self._config["options"][key]
 
     def __setitem__(self, key, value):
@@ -76,41 +77,52 @@ class Config:
             self._config["options"][key] = str(value)
 
 
-def find_configfile() -> Path:
-    """Finds location of configuration file"""
+def find_configfile(name: str="arxiv-scan") -> Path:
+    """Finds location of configuration file. Supports name parameter for legacy locations"""
     # Check environment variable
-    if "SCAN_ASTROPH_CONF" in os.environ:
-        return Path(os.path.expandvars(os.environ["SCAN_ASTRO_PH_CONF"]))
+    if "ARXIV_SCAN_CONF" in os.environ:
+        return Path(os.path.expandvars(os.environ["ARXIV_SCAN_CONF"]))
 
     # check home directory
-    configpath = Path.home() / ".scan_astro-ph.conf"
+    configpath = Path.home() / ".{}.conf".format(name)
     if configpath.is_file():
         return configpath
 
     # check platform specific configuration location
-    configpath = configfile_default_location()
+    configpath = configfile_default_location(name=name)
     if configpath.is_file():
         return configpath
 
-    raise FileNotFoundError("Could not find scan_astroph.conf. Check Readme for config locations")
+    # check legacy locations
+    if name == "arxiv-scan":
+        try:
+            return find_configfile(name="scan_astroph")
+        except FileNotFoundError:
+            pass
+        try:
+            return find_configfile(name="scan_astro-ph")
+        except FileNotFoundError:
+            pass
 
-def configfile_default_location(mkdir: bool=False) -> Path:
+    raise FileNotFoundError("Could not find arxiv-scan.conf. Check Readme for config locations")
+
+def configfile_default_location(mkdir: bool=False, name: str="arxiv-scan") -> Path:
     """Find platform dependent configfile location
 
     With `mkdir=True` all parent directories for the config file are created.
 
-    On Linux: `$XDG_CONFIG_HOME/scan_astroph/scan_astroph.conf` (`~/.local/scan_astroph/scan_astroph.conf`)
-    On Windows: `$HOME/Documents/scan_astroph/scan_astroph.conf`
-    On MacOS: `$HOME/Library/Application Support/scan_astroph/scan_astroph.conf`
+    On Linux: `$XDG_CONFIG_HOME/arxiv-scan/arxiv-scan.conf` (`~/.config/arxiv-scan/arxiv-scan.conf`)
+    On Windows: `$HOME/Documents/arxiv-scan/arxiv-scan.conf`
+    On MacOS: `$HOME/Library/Application Support/arxiv-scan/arxiv-scan.conf`
 
     For more details check out documentation of appdirs
     """
     if sys.platform == "darwin": # MacOS
-        path = Path.home() / "Library" / "Application Support" / "scan_astroph" / "scan_astroph.conf"
+        path = (Path.home() / "Library" / "Application Support" / name / name).with_suffix(".conf")
     elif sys.platform == "win32": # Windows
-        path = Path.home() / "Documents" / "scan_astroph" / "scan_astroph.conf"
+        path = (Path.home() / "Documents" / name / name).with_suffix(".conf")
     else: # Linux and other Unixes
-        path = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / "scan_astroph" / "scan_astroph.conf"
+        path = (Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".config")) / name / name).with_suffix(".conf")
 
     if mkdir:
         path.parent.mkdir(parents=True, exist_ok=True)
