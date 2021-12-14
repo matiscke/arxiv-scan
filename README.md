@@ -10,12 +10,12 @@ Requirements: Python >3.5
 
 These scripts can be installed with pip (or with [pipx]() for an isolated environment):
 ```
-pip install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=arxiv_scan
+pip install --upgrade git+https://github.com/matiscke/arxiv-scan.git
 ```
 Depending on your Python installation, you might need one of the following:
 ```
-pip3 install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=arxiv_scan
-python3 -m pip install --upgrade git+https://github.com/matiscke/scan_astro-ph.git#egg=arxiv_scan
+pip3 install --upgrade git+https://github.com/matiscke/arxiv-scan.git
+python3 -m pip install --upgrade git+https://github.com/matiscke/arxiv-scan
 ```
 
 # Usage
@@ -92,7 +92,7 @@ show_cross_lists = True
 ```
 
 ## Automatically extract keywords from a file (e.g. one with bibtex entries):
-- Run `scan_astro-ph.wordcounter file_to_scan` (or `python -m scan_astroph.wordcounter file_to_scan`).
+- Run `arxiv-scan.wordcounter file_to_scan` (or `python -m scan_astroph.wordcounter file_to_scan`).
 It scans the text file and extracts words with 4-12 characters from it, sorted by occurrence in the file.
 - You will be asked to rank these suggested keywords. For each word shown, press 'Enter' to reject it or provide an integer rating, e.g., from 1 to 5 (higher=more relevant). Conclude by pressing `C`.
 - Manually insert particularly important authors into the config file (e.g. with `arxiv-scan --edit`)
@@ -107,7 +107,7 @@ It scans the text file and extracts words with 4-12 characters from it, sorted b
   - on Windows: `$HOME/Documents/arxiv-scan/arxiv-scan.conf`
 
 # Feedback
-All feedback, including bug reports, feature requests, pull requests, etc., is welcome. `arxiv-scan` is being actively developed in an open repository; if you have any trouble please raise an [issue](https://github.com/matiscke/scan_astro-ph/issues/new).
+All feedback, including bug reports, feature requests, pull requests, etc., is welcome. `arxiv-scan` is being actively developed in an open repository; if you have any trouble please raise an [issue](https://github.com/matiscke/arxiv-scan/issues/new).
 
 ---------------------
 License: [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
