@@ -110,4 +110,4 @@ It scans the text file and extracts words with 4-12 characters from it, sorted b
 All feedback, including bug reports, feature requests, pull requests, etc., is welcome. `arxiv-scan` is being actively developed in an open repository; if you have any trouble please raise an [issue](https://github.com/matiscke/arxiv-scan/issues/new).
 
 ---------------------
-License: [CC BY 3.0](http://creativecommons.org/licenses/by/3.0/)
+License: [MIT License](https://choosealicense.com/licenses/mit/)
