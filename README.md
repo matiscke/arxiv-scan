@@ -8,15 +8,20 @@ Keywords can be typed in manually or be found by ranking word occurrences in a p
 # Installation
 Requirements: Python >=3.5
 
-These scripts can be installed with pip (or with [pipx](https://pypa.github.io/pipx/) for an isolated environment):
+## Using pip 
+We recommend to install the latest stable version of *arxiv-scan* using pip (or [pipx](https://pypa.github.io/pipx/) for an isolated environment):
 ```
-pip install --upgrade arxiv-scan
+pip install arxiv-scan
 ```
-Depending on your Python installation, you might need one of the following:
+:information_source:  Depending on your Python installation, you might instead need `pip3 install arxiv-scan` or `python3 -m pip install arxiv-scan`.
+
+## From source
+*arxiv-scan* is being developed on github. If you feel like hacking, feel free to install the latest version from there:
 ```
-pip3 install --upgrade arxiv-scan
-python3 -m pip install --upgrade arxiv-scan
+pip install --upgrade git+https://github.com/matiscke/arxiv-scan.git
 ```
+
+
 
 # Usage
 ## Query today's arXiV listing for relevant papers
