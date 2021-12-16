@@ -1,5 +1,12 @@
 arxiv-scan
 =============
+![GitHub release](https://img.shields.io/github/v/release/matiscke/arxiv-scan?include_prereleases&label=Github%20Release)
+![PyPI](https://img.shields.io/pypi/v/arxiv-scan)
+![PyPI - Downloads](https://img.shields.io/pypi/dm/arxiv-scan)
+![License](https://img.shields.io/github/license/matiscke/arxiv-scan)
+![GitHub issues](https://img.shields.io/github/issues/matiscke/arxiv-scan)
+![GitHub pull requests](https://img.shields.io/github/issues-pr/matiscke/arxiv-scan)
+
 Scan abstract listings on ArXiV for keywords and favorite authors in your categories to distill a list of papers most relevant for *you*.
 Keywords can be typed in manually or be found by ranking word occurrences in a provided file (e.g., a `.bib` file).
 
