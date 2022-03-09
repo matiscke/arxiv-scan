@@ -116,3 +116,7 @@ All feedback, including bug reports, feature requests, pull requests, etc., is w
 
 ---------------------
 License: [MIT License](https://choosealicense.com/licenses/mit/)
+
+
+---------------------
+We thank arXiv for its open access interoperability. This package was not reviewed or approved by, nor does it necessarily express or reflect the policies or opinions of, arXiv.
