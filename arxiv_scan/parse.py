@@ -69,6 +69,9 @@ def get_entries(
             f"&sortBy={sortby}&sortOrder=descending"
             f"&start={start}&max_results={max_results}"
         )
+        # handle errors
+        if feed.bozo:
+            raise feed.bozo_exception
 
         if len(feed.entries) == 0:
             break
