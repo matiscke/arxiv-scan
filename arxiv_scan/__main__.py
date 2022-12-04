@@ -140,11 +140,17 @@ def main():
     for category in categories:
         categories.extend(category_map.get(category, ()))
 
-    entries = get_entries(
-        categories, cutoff_date=cutoff_date,
-        cross_lists=config["show_cross_lists"],
-        resubmissions=config["show_resubmissions"]
-    )
+    try:
+        entries = get_entries(
+            categories, cutoff_date=cutoff_date,
+            cross_lists=config["show_cross_lists"],
+            resubmissions=config["show_resubmissions"]
+        )
+    except Exception as e:
+        print("Error while fetching feed:")
+        print(repr(e))
+        sys.exit(1)
+
     evaluate_entries(entries, keyword_ratings=config.keywords,
                      author_ratings=config.authors, rate_abstract=not args.ignore_abstract)
     entries = sort_entries(
