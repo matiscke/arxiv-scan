@@ -10,6 +10,8 @@ arxiv-scan
 Scan abstract listings on ArXiV for keywords and favorite authors in your categories to distill a list of papers most relevant for *you*.
 Keywords can be typed in manually or be found by ranking word occurrences in a provided file (e.g., a `.bib` file).
 
+<img src="arxiv-scan_demo.gif" width="800"/>
+
 *arxiv-scan* was created by [Robert Glas](https://github.com/rmglas), [Simeon Doetsch](https://github.com/Simske), and [Martin Schlecker](https://github.com/matiscke).
 
 # Installation
