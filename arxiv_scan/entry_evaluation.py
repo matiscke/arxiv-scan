@@ -83,6 +83,7 @@ class Entry(object):
                 if match:
                     self.mark_author(i)
                     self.rating += rating
+                    break  # count each author only once
 
         return self.rating
 
