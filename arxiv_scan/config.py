@@ -30,6 +30,7 @@ class Config:
             "reverse_list": False,
             "show_resubmissions": False,
             "show_cross_lists": True,
+            "ignore_abstract": False,
         }
 
     @property

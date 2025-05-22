@@ -37,7 +37,7 @@ def parse_cli_arguments() -> tuple:
                         help="Include resubmissions")
     parser.add_argument("--ignore-cross-lists", action="store_true", default=None,
                         help="Include cross-lists")
-    parser.add_argument("--ignore-abstract", action="store_true",
+    parser.add_argument("--ignore-abstract", action="store_true", default=None,
                         help="Ignore abstract in rating")
     parser.add_argument("--log", choices=["info", "debug"], default="warning",
                         help="Set loglevel")
@@ -112,6 +112,7 @@ def main():
     config["show_cross_lists"] = (
         not args.ignore_cross_lists if args.ignore_cross_lists is not None else None
     )
+    config["ignore_abstract"] = args.ignore_abstract
 
     # parse date string
     if config["date"] == "new" or config["date"] is None:
@@ -153,7 +154,7 @@ def main():
         sys.exit(1)
 
     evaluate_entries(entries, keyword_ratings=config.keywords,
-                     author_ratings=config.authors, rate_abstract=not args.ignore_abstract)
+                     author_ratings=config.authors, rate_abstract=not config["ignore_abstract"])
     entries = sort_entries(
         entries,
         rating_min=config["minimum_rating"],
