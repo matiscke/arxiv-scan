@@ -86,6 +86,7 @@ def main():
                 print("No file to edit. Exiting")
                 sys.exit(1)
         file_editor(path)
+        sys.exit()
 
     # read config
     config = Config()
