@@ -46,7 +46,7 @@ def get_entries(
         categories (list): List of arXiv subjects (e.g. `astr-ph.EP`)
         cutoff_date (datetime.datetime): Get submissions since this date
         cross_lists (:obj:`bool`, optional): Include cross-lists (default: True)
-        resubmissions (:obj:`bool`, optional): Inlcude resubmissions (default: False)
+        resubmissions (:obj:`bool`, optional): Show only resubmissions (default: False)
 
     Returns:
         list of Entry
@@ -68,6 +68,8 @@ def get_entries(
         #    erroneous server reply
         raise ValueError('cutoff date cannot be earlier than two years in the past')
 
+    # note: sortBy=lastUpdatedDate shows ONLY resubmissions because, apparently,
+    #       the submission date does not count as "lastUpdatedDate"
     sortby = "lastUpdatedDate" if resubmissions else "submittedDate"
 
     search_query = "+OR+".join(f"cat:{cat}" for cat in categories)
