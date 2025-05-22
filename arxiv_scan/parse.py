@@ -1,6 +1,7 @@
 """Functions relating to parsing Arxiv.org"""
 from datetime import datetime, timedelta
 
+import time
 import feedparser
 import pytz
 
@@ -55,6 +56,15 @@ def get_entries(
     )
     max_results = min(max(days_since_cutoff * 10, 15), 1000)
 
+    if days_since_cutoff > 365 * 2:
+        # limit the amount of data that the user can request because
+        # 1) requests for huge amounts of data are very slow
+        # 2) we must avoid asking for ALL entries in a category
+        #    because then the last server reply would contain zero
+        #    entries, and we could not distinguish this from an
+        #    erroneous server reply
+        raise ValueError('cutoff date cannot be earlier than two years in the past')
+
     sortby = "lastUpdatedDate" if resubmissions else "submittedDate"
 
     search_query = "+OR+".join(f"cat:{cat}" for cat in categories)
@@ -69,12 +79,19 @@ def get_entries(
             f"&sortBy={sortby}&sortOrder=descending"
             f"&start={start}&max_results={max_results}"
         )
+
         # handle errors
         if feed.bozo:
             raise feed.bozo_exception
 
         if len(feed.entries) == 0:
-            break
+            # a response with no entries indicates a problem with the API response;
+            # only if the cutoff date was so far in the past that we ask for ALL
+            # entries in a category, this would lead to an infinite loop here,
+            # which we hopefully avoid by limiting all requests to 2 years
+            time.sleep(3)
+            continue  # try again
+
         for feedentry in feed.entries:
             entry = atom2entry(feedentry)
             # stop if cutoff date is reached
@@ -87,7 +104,12 @@ def get_entries(
             entries.append(entry)
 
         # new startpoint for next request
-        start += max_results
+        # note: the number of feed entries might be < max_results
+        #       because of incomplete server replies
+        start += len(feed.entries)
+
+        # play nice and sleep a bit (and the server replies are more stable)
+        time.sleep(3)
 
     return entries
 
