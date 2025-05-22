@@ -51,6 +51,7 @@ def main():
     args = parse_cli_arguments()
 
     logging.basicConfig(level=getattr(logging, args.log.upper()))
+    logger = logging.getLogger(__name__)
 
     # write default config
     if args.default_config:
@@ -96,11 +97,11 @@ def main():
         try:
             configfile = find_configfile()
         except FileNotFoundError:
-            logging.error("Cannot find config file. Check Readme for configuration locations")
+            logger.error("Cannot find config file. Check Readme for configuration locations")
             sys.exit(1)
 
     config.read(configfile)
-    logging.info("Reading configuration from file '%s'", configfile)
+    logger.info("Reading configuration from file '%s'", configfile)
 
     # overwrite config from CLI arguments
     config["date"] = args.date

@@ -2,6 +2,7 @@
 from datetime import datetime, timedelta
 
 import time
+import logging
 import feedparser
 import pytz
 
@@ -50,6 +51,8 @@ def get_entries(
     Returns:
         list of Entry
     """
+    logger = logging.getLogger(__name__)
+
     # set results per API request to 10 per day (min 15, max 1000)
     days_since_cutoff = round(
         (datetime.now().astimezone() - cutoff_date) / timedelta(days=1)
@@ -75,6 +78,13 @@ def get_entries(
     finished = False
     while not finished:
         feed = feedparser.parse(
+            f"https://export.arxiv.org/api/query?search_query={search_query}"
+            f"&sortBy={sortby}&sortOrder=descending"
+            f"&start={start}&max_results={max_results}"
+        )
+
+        logger.debug(
+            "Query: "
             f"https://export.arxiv.org/api/query?search_query={search_query}"
             f"&sortBy={sortby}&sortOrder=descending"
             f"&start={start}&max_results={max_results}"

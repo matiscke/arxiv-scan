@@ -1,4 +1,7 @@
 """Functions related to outputting to terminal"""
+
+import logging
+
 from termcolor import colored
 
 def print_entries(entries: list):
@@ -41,3 +44,6 @@ def print_entries(entries: list):
             print('     {title:s}'.format(title=line))
 
         print(f"     submitted {entry.date_submitted} on {entry.category}")
+
+        logger = logging.getLogger(__name__)
+        logger.info("Detailed ratings: " + ", ".join([f"{k:s}: {v:d}" for k, v in entry.detailed_ratings.items()]))
