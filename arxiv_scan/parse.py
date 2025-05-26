@@ -76,23 +76,22 @@ def get_entries(
 
     search_query = "+OR+".join(f"cat:{cat}" for cat in categories)
 
+    delay = 3  # 3 seconds is recommended by the arxiv API
+
     entries = []
     # Extract entries, make multiple requests if more than max_results entries
     start = 0
     finished = False
     while not finished:
-        feed = feedparser.parse(
+        arxiv_url = (
             f"https://export.arxiv.org/api/query?search_query={search_query}"
             f"&sortBy={sortby}&sortOrder=descending"
             f"&start={start}&max_results={max_results}"
         )
 
-        logger.debug(
-            "Query: "
-            f"https://export.arxiv.org/api/query?search_query={search_query}"
-            f"&sortBy={sortby}&sortOrder=descending"
-            f"&start={start}&max_results={max_results}"
-        )
+        feed = feedparser.parse(arxiv_url)
+
+        logger.debug(arxiv_url)
 
         # handle errors
         if feed.bozo:
@@ -103,7 +102,7 @@ def get_entries(
             # only if the cutoff date was so far in the past that we ask for ALL
             # entries in a category, this would lead to an infinite loop here,
             # which we hopefully avoid by limiting all requests to 2 years
-            time.sleep(3)
+            time.sleep(delay)
             continue  # try again
 
         for feedentry in feed.entries:
@@ -123,7 +122,7 @@ def get_entries(
         start += len(feed.entries)
 
         # play nice and sleep a bit (and the server replies are more stable)
-        time.sleep(3)
+        time.sleep(delay)
 
     return entries
 
