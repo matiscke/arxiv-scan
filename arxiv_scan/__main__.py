@@ -12,6 +12,9 @@ from .parse import get_entries, submission_window_start
 from .categories import category_map
 
 
+logger = logging.getLogger(__name__)
+
+
 def parse_cli_arguments() -> tuple:
     """Definition and parsing of command line arguments"""
     parser = ArgumentParser()
@@ -51,7 +54,6 @@ def main():
     args = parse_cli_arguments()
 
     logging.basicConfig(level=getattr(logging, args.log.upper()))
-    logger = logging.getLogger(__name__)
 
     # write default config
     if args.default_config:

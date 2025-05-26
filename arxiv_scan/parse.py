@@ -9,6 +9,9 @@ import pytz
 from .entry_evaluation import Entry
 
 
+logger = logging.getLogger(__name__)
+
+
 def linebreak_fix(text: str):
     """Replace linebreaks and indenting with single space"""
     return " ".join(line.strip() for line in text.split("\n"))
@@ -51,7 +54,6 @@ def get_entries(
     Returns:
         list of Entry
     """
-    logger = logging.getLogger(__name__)
 
     # set results per API request to 10 per day (min 15, max 1000)
     days_since_cutoff = round(
