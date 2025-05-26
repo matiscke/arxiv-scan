@@ -41,7 +41,7 @@ then just run `arxiv-scan` (or `python -m arxiv_scan`) to get the relevant listi
 ```
 usage: arxiv-scan [-h] [--config /path/to/config] [--default-config [/path/to/config]]
                   [--config-convert [/path/to/config]] [--edit] [-d DATE] [-l LENGTH]
-                  [-v RATING] [-c CATEGORIES] [--reverse] [--show-resubmissions]
+                  [-v RATING] [-c CATEGORIES] [--reverse] [--only-resubmissions]
                   [--ignore-cross-lists] [--ignore-abstract] [--log {info,debug}]
                   [--version]
 
@@ -63,7 +63,7 @@ optional arguments:
   -c CATEGORIES, --categories CATEGORIES
                         arXiv subjects to scan, comma separated list
   --reverse             reverse list (lowest ranked paper on top)
-  --show-resubmissions  Include resubmissions
+  --only-resubmissions  Show only resubmissions
   --ignore-cross-lists  Include cross-lists
   --ignore-abstract     Ignore abstract in rating
   --log {info,debug}    Set loglevel
@@ -101,8 +101,9 @@ date = new
 length = -1
 minimum_rating = 10 
 reverse_list = False
-show_resubmissions = False
+only_resubmissions = False
 show_cross_lists = True
+ignore_abstract = False
 ```
 
 ## Automatically extract keywords from a file (e.g. one with bibtex entries):
