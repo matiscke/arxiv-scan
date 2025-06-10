@@ -64,7 +64,7 @@ optional arguments:
                         arXiv subjects to scan, comma separated list
   --reverse             reverse list (lowest ranked paper on top)
   --only-resubmissions  Show only resubmissions
-  --ignore-cross-lists  Include cross-lists
+  --ignore-cross-lists  Ignore cross-lists
   --ignore-abstract     Ignore abstract in rating
   --log {info,debug}    Set loglevel
   --version             show program's version number and exit
