@@ -39,7 +39,7 @@ def parse_cli_arguments() -> tuple:
     parser.add_argument("--only-resubmissions", action="store_true", default=None,
                         help="Show only resubmissions")
     parser.add_argument("--ignore-cross-lists", action="store_true", default=None,
-                        help="Include cross-lists")
+                        help="Ignore cross-lists")
     parser.add_argument("--ignore-abstract", action="store_true", default=None,
                         help="Ignore abstract in rating")
     parser.add_argument("--log", choices=["info", "debug"], default="warning",
