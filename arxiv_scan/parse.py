@@ -78,11 +78,14 @@ def get_entries(
 
     delay = 3  # 3 seconds is recommended by the arxiv API
 
+    num_errors = 0
+    max_errors = 100  # exit program when too many errors occur
+
     entries = []
     # Extract entries, make multiple requests if more than max_results entries
     start = 0
     finished = False
-    while not finished:
+    while not finished and num_errors <= max_errors:
         arxiv_url = (
             f"https://export.arxiv.org/api/query?search_query={search_query}"
             f"&sortBy={sortby}&sortOrder=descending"
@@ -91,12 +94,14 @@ def get_entries(
 
         feed = feedparser.parse(arxiv_url)
 
-        logger.debug(arxiv_url)
+        logger.debug(f'Query: {arxiv_url:s}')
+        logger.debug(f'Errors so far: {num_errors:d}')
 
         # handle errors
         if feed.bozo:
             if isinstance(feed.bozo_exception.reason, ConnectionResetError):
                 logger.debug('Try again after ConnectionResetError: [Errno 104] Connection reset by peer')
+                num_errors += 1
                 time.sleep(delay)
                 continue  # try again
             else:
@@ -107,6 +112,7 @@ def get_entries(
             # only if the cutoff date was so far in the past that we ask for ALL
             # entries in a category, this would lead to an infinite loop here,
             # which we hopefully avoid by limiting all requests to 2 years
+            num_errors += 1
             time.sleep(delay)
             continue  # try again
 
@@ -121,6 +127,10 @@ def get_entries(
                 continue
             entries.append(entry)
 
+        if len(feed.entries) < max_results:
+            # we obtained less data than requested
+            num_errors += 1
+
         # new startpoint for next request
         # note: the number of feed entries might be < max_results
         #       because of incomplete server replies
@@ -128,6 +138,9 @@ def get_entries(
 
         # play nice and sleep a bit (and the server replies are more stable)
         time.sleep(delay)
+
+    if num_errors > max_errors:
+        raise IOError('Could not retreive data because of too many errors with the arxiv API')
 
     return entries
 
