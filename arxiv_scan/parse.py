@@ -95,7 +95,12 @@ def get_entries(
 
         # handle errors
         if feed.bozo:
-            raise feed.bozo_exception
+            if isinstance(feed.bozo_exception.reason, ConnectionResetError):
+                logger.debug('Try again after ConnectionResetError: [Errno 104] Connection reset by peer')
+                time.sleep(delay)
+                continue  # try again
+            else:
+                raise feed.bozo_exception
 
         if len(feed.entries) == 0:
             # a response with no entries indicates a problem with the API response;
