@@ -76,7 +76,11 @@ def get_entries(
 
     search_query = "+OR+".join(f"cat:{cat}" for cat in categories)
 
-    delay = 3  # 3 seconds is recommended by the arxiv API
+    # delay between requests: 3 seconds is recommended by the arxiv API,
+    # but we try less before increasing the delay time
+    delay = 0.5
+    delay_min = 0.5
+    delay_max = 4.0
 
     num_errors = 0
     max_errors = 100  # exit program when too many errors occur
@@ -95,13 +99,14 @@ def get_entries(
         feed = feedparser.parse(arxiv_url)
 
         logger.debug(f'Query: {arxiv_url:s}')
-        logger.debug(f'Errors so far: {num_errors:d}')
+        logger.debug(f'Encountered {num_errors:3d} errors so far and delay time is currently {delay:3.1f} seconds')
 
         # handle errors
         if feed.bozo:
             if isinstance(feed.bozo_exception.reason, ConnectionResetError):
                 logger.debug('Try again after ConnectionResetError: [Errno 104] Connection reset by peer')
                 num_errors += 1
+                delay = min(delay*2, delay_max)
                 time.sleep(delay)
                 continue  # try again
             else:
@@ -113,6 +118,7 @@ def get_entries(
             # entries in a category, this would lead to an infinite loop here,
             # which we hopefully avoid by limiting all requests to 2 years
             num_errors += 1
+            delay = min(delay*2, delay_max)
             time.sleep(delay)
             continue  # try again
 
@@ -127,14 +133,18 @@ def get_entries(
                 continue
             entries.append(entry)
 
-        if len(feed.entries) < max_results:
-            # we obtained less data than requested
-            num_errors += 1
-
         # new startpoint for next request
         # note: the number of feed entries might be < max_results
         #       because of incomplete server replies
         start += len(feed.entries)
+
+        if len(feed.entries) < max_results:
+            # we obtained less data than requested
+            num_errors += 1
+            delay = min(delay*2, delay_max)
+        else:
+            # everything OK
+            delay = max(delay/2, delay_min)
 
         # play nice and sleep a bit (and the server replies are more stable)
         time.sleep(delay)
