@@ -55,20 +55,6 @@ def get_entries(
         list of Entry
     """
 
-    # set results per API request to 10 per day (min 15, max 1000)
-    days_since_cutoff = round(
-        (datetime.now().astimezone() - cutoff_date) / timedelta(days=1)
-    )
-
-    if days_since_cutoff > 365 * 2:
-        # limit the amount of data that the user can request because
-        # 1) requests for huge amounts of data are very slow
-        # 2) we must avoid asking for ALL entries in a category
-        #    because then the last server reply would contain zero
-        #    entries, and we could not distinguish this from an
-        #    erroneous server reply
-        raise ValueError('cutoff date cannot be earlier than two years in the past')
-
     # note: sortBy=lastUpdatedDate shows ONLY resubmissions because, apparently,
     #       the submission date does not count as "lastUpdatedDate"
     sortby = "lastUpdatedDate" if resubmissions else "submittedDate"
