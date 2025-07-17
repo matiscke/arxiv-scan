@@ -59,7 +59,6 @@ def get_entries(
     days_since_cutoff = round(
         (datetime.now().astimezone() - cutoff_date) / timedelta(days=1)
     )
-    max_results = min(max(days_since_cutoff * 10, 15), 1000)
 
     if days_since_cutoff > 365 * 2:
         # limit the amount of data that the user can request because
@@ -81,6 +80,10 @@ def get_entries(
     delay = 0.5
     delay_min = 0.5
     delay_max = 4.0
+
+    # number of requested results: should not be more than 1000 (see arxiv API)
+    # but it seems that the server (at the moment?) likes 800 better
+    max_results = 800
 
     num_errors = 0
     max_errors = 100  # exit program when too many errors occur
