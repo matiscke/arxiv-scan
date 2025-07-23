@@ -21,7 +21,9 @@ class Entry(object):
 
         self.title_marks = []
         self.author_marks = [False] * len(self.authors)
+
         self.rating = None
+        self.detailed_ratings = {}
 
     def __repr__(self) -> str:
         return (
@@ -63,7 +65,6 @@ class Entry(object):
         Returns:
             int: rating for this entry
         """
-        self.rating = 0
         # find keywords in title and abstract
         for keyword, rating in keyword_ratings.items():
             keyword = keyword.lower()
@@ -71,10 +72,15 @@ class Entry(object):
             counts = self.title.lower().count(keyword)
             if counts > 0:
                 self.mark_title_keyword(keyword)
-                self.rating += counts * rating
+                self.detailed_ratings[keyword] = counts * rating
             # find keyword in abstract
             if rate_abstract:
-                self.rating += self.abstract.lower().count(keyword) * rating
+                counts = self.abstract.lower().count(keyword)
+                if counts > 0:
+                    try:
+                        self.detailed_ratings[keyword] += counts * rating
+                    except KeyError:
+                        self.detailed_ratings[keyword] = counts * rating
 
         # find authors
         for author, rating in author_ratings.items():
@@ -82,8 +88,10 @@ class Entry(object):
                 match = re.search(r'\b{}\b'.format(author), a, flags=re.IGNORECASE)
                 if match:
                     self.mark_author(i)
-                    self.rating += rating
+                    self.detailed_ratings[author] = rating
+                    break  # count each author only once
 
+        self.rating = sum(self.detailed_ratings.values())
         return self.rating
 
 def evaluate_entries(entries: list, keyword_ratings: dict, author_ratings: dict, rate_abstract: bool=True) -> list:

@@ -28,8 +28,9 @@ class Config:
             "length": -1,
             "minimum_rating": 10,
             "reverse_list": False,
-            "show_resubmissions": False,
+            "only_resubmissions": False,
             "show_cross_lists": True,
+            "ignore_abstract": False,
         }
 
     @property

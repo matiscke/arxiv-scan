@@ -12,6 +12,9 @@ from .parse import get_entries, submission_window_start
 from .categories import category_map
 
 
+logger = logging.getLogger(__name__)
+
+
 def parse_cli_arguments() -> tuple:
     """Definition and parsing of command line arguments"""
     parser = ArgumentParser()
@@ -33,11 +36,11 @@ def parse_cli_arguments() -> tuple:
                         help="arXiv subjects to scan, comma seperated list")
     parser.add_argument("--reverse", action="store_true", default=None,
                         help="reverse list (lowest ranked paper on top)")
-    parser.add_argument("--show-resubmissions", action="store_true", default=None,
-                        help="Include resubmissions")
+    parser.add_argument("--only-resubmissions", action="store_true", default=None,
+                        help="Show only resubmissions")
     parser.add_argument("--ignore-cross-lists", action="store_true", default=None,
-                        help="Include cross-lists")
-    parser.add_argument("--ignore-abstract", action="store_true",
+                        help="Ignore cross-lists")
+    parser.add_argument("--ignore-abstract", action="store_true", default=None,
                         help="Ignore abstract in rating")
     parser.add_argument("--log", choices=["info", "debug"], default="warning",
                         help="Set loglevel")
@@ -86,6 +89,7 @@ def main():
                 print("No file to edit. Exiting")
                 sys.exit(1)
         file_editor(path)
+        sys.exit()
 
     # read config
     config = Config()
@@ -95,11 +99,11 @@ def main():
         try:
             configfile = find_configfile()
         except FileNotFoundError:
-            logging.error("Cannot find config file. Check Readme for configuration locations")
+            logger.error("Cannot find config file. Check Readme for configuration locations")
             sys.exit(1)
 
     config.read(configfile)
-    logging.info("Reading configuration from file '%s'", configfile)
+    logger.info("Reading configuration from file '%s'", configfile)
 
     # overwrite config from CLI arguments
     config["date"] = args.date
@@ -107,10 +111,11 @@ def main():
     config["minimum_rating"] = args.rating
     config["categories"] = args.categories
     config["reverse_list"] = args.reverse
-    config["show_resubmissions"] = args.show_resubmissions
+    config["only_resubmissions"] = args.only_resubmissions
     config["show_cross_lists"] = (
         not args.ignore_cross_lists if args.ignore_cross_lists is not None else None
     )
+    config["ignore_abstract"] = args.ignore_abstract
 
     # parse date string
     if config["date"] == "new" or config["date"] is None:
@@ -144,7 +149,7 @@ def main():
         entries = get_entries(
             categories, cutoff_date=cutoff_date,
             cross_lists=config["show_cross_lists"],
-            resubmissions=config["show_resubmissions"]
+            resubmissions=config["only_resubmissions"]
         )
     except Exception as e:
         print("Error while fetching feed:")
@@ -152,7 +157,7 @@ def main():
         sys.exit(1)
 
     evaluate_entries(entries, keyword_ratings=config.keywords,
-                     author_ratings=config.authors, rate_abstract=not args.ignore_abstract)
+                     author_ratings=config.authors, rate_abstract=not config["ignore_abstract"])
     entries = sort_entries(
         entries,
         rating_min=config["minimum_rating"],

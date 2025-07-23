@@ -1,10 +1,15 @@
 """Functions relating to parsing Arxiv.org"""
 from datetime import datetime, timedelta
 
+import time
+import logging
 import feedparser
 import pytz
 
 from .entry_evaluation import Entry
+
+
+logger = logging.getLogger(__name__)
 
 
 def linebreak_fix(text: str):
@@ -44,37 +49,68 @@ def get_entries(
         categories (list): List of arXiv subjects (e.g. `astr-ph.EP`)
         cutoff_date (datetime.datetime): Get submissions since this date
         cross_lists (:obj:`bool`, optional): Include cross-lists (default: True)
-        resubmissions (:obj:`bool`, optional): Inlcude resubmissions (default: False)
+        resubmissions (:obj:`bool`, optional): Show only resubmissions (default: False)
 
     Returns:
         list of Entry
     """
-    # set results per API request to 10 per day (min 15, max 1000)
-    days_since_cutoff = round(
-        (datetime.now().astimezone() - cutoff_date) / timedelta(days=1)
-    )
-    max_results = min(max(days_since_cutoff * 10, 15), 1000)
 
+    # note: sortBy=lastUpdatedDate shows ONLY resubmissions because, apparently,
+    #       the submission date does not count as "lastUpdatedDate"
     sortby = "lastUpdatedDate" if resubmissions else "submittedDate"
 
     search_query = "+OR+".join(f"cat:{cat}" for cat in categories)
+
+    # delay between requests: 3 seconds is recommended by the arxiv API,
+    # but we try less before increasing the delay time
+    delay = 0.5
+    delay_min = 0.5
+    delay_max = 4.0
+
+    # number of requested results: should not be more than 1000 (see arxiv API)
+    # but it seems that the server (at the moment?) likes 800 better
+    max_results = 800
+
+    num_errors = 0
+    max_errors = 100  # exit program when too many errors occur
 
     entries = []
     # Extract entries, make multiple requests if more than max_results entries
     start = 0
     finished = False
-    while not finished:
-        feed = feedparser.parse(
+    while not finished and num_errors <= max_errors:
+        arxiv_url = (
             f"https://export.arxiv.org/api/query?search_query={search_query}"
             f"&sortBy={sortby}&sortOrder=descending"
             f"&start={start}&max_results={max_results}"
         )
+
+        feed = feedparser.parse(arxiv_url)
+
+        logger.debug(f'Query: {arxiv_url:s}')
+        logger.debug(f'Encountered {num_errors:3d} errors so far and delay time is currently {delay:3.1f} seconds')
+
         # handle errors
         if feed.bozo:
-            raise feed.bozo_exception
+            if isinstance(feed.bozo_exception.reason, ConnectionResetError):
+                logger.debug('Try again after ConnectionResetError: [Errno 104] Connection reset by peer')
+                num_errors += 1
+                delay = min(delay*2, delay_max)
+                time.sleep(delay)
+                continue  # try again
+            else:
+                raise feed.bozo_exception
 
         if len(feed.entries) == 0:
-            break
+            # a response with no entries indicates a problem with the API response;
+            # only if the cutoff date was so far in the past that we ask for ALL
+            # entries in a category, this would lead to an infinite loop here,
+            # which we hopefully avoid by limiting all requests to 2 years
+            num_errors += 1
+            delay = min(delay*2, delay_max)
+            time.sleep(delay)
+            continue  # try again
+
         for feedentry in feed.entries:
             entry = atom2entry(feedentry)
             # stop if cutoff date is reached
@@ -87,7 +123,23 @@ def get_entries(
             entries.append(entry)
 
         # new startpoint for next request
-        start += max_results
+        # note: the number of feed entries might be < max_results
+        #       because of incomplete server replies
+        start += len(feed.entries)
+
+        if len(feed.entries) < max_results:
+            # we obtained less data than requested
+            num_errors += 1
+            delay = min(delay*2, delay_max)
+        else:
+            # everything OK
+            delay = max(delay/2, delay_min)
+
+        # play nice and sleep a bit (and the server replies are more stable)
+        time.sleep(delay)
+
+    if num_errors > max_errors:
+        raise IOError('Could not retreive data because of too many errors with the arxiv API')
 
     return entries
 
