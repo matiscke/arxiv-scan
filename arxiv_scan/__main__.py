@@ -33,7 +33,7 @@ def parse_cli_arguments() -> tuple:
     parser.add_argument("-v", "--rating", type=int, default=None,
                         help="minimum rating for result list")
     parser.add_argument("-c", "--categories", default=None,
-                        help="arXiv subjects to scan, comma seperated list")
+                        help="arXiv subjects to scan, comma separated list")
     parser.add_argument("--reverse", action="store_true", default=None,
                         help="reverse list (lowest ranked paper on top)")
     parser.add_argument("--only-resubmissions", action="store_true", default=None,
