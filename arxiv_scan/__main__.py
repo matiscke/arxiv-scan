@@ -9,7 +9,7 @@ from .config import (Config, configfile_default_location, file_editor,
 from .entry_evaluation import evaluate_entries, sort_entries
 from .output import print_entries
 from .parse import get_entries, submission_window_start
-from .categories import category_map
+from .categories import check_categories
 
 
 logger = logging.getLogger(__name__)
@@ -36,8 +36,8 @@ def parse_cli_arguments() -> tuple:
                         help="arXiv subjects to scan, comma seperated list")
     parser.add_argument("--reverse", action="store_true", default=None,
                         help="reverse list (lowest ranked paper on top)")
-    parser.add_argument("--only-resubmissions", action="store_true", default=None,
-                        help="Show only resubmissions")
+    parser.add_argument("--resubmissions", action="store_true", default=None,
+                        help="Show also resubmissions")
     parser.add_argument("--ignore-cross-lists", action="store_true", default=None,
                         help="Ignore cross-lists")
     parser.add_argument("--ignore-abstract", action="store_true", default=None,
@@ -77,7 +77,7 @@ def main():
         print("Convert legacy configuration to {}".format(path))
         sys.exit()
 
-    # Open config file in text editor
+    # open config file in text editor
     if args.edit:
         try:
             path = find_configfile()
@@ -111,7 +111,7 @@ def main():
     config["minimum_rating"] = args.rating
     config["categories"] = args.categories
     config["reverse_list"] = args.reverse
-    config["only_resubmissions"] = args.only_resubmissions
+    config["resubmissions"] = args.resubmissions
     config["show_cross_lists"] = (
         not args.ignore_cross_lists if args.ignore_cross_lists is not None else None
     )
@@ -140,22 +140,33 @@ def main():
 
     print(f"Getting Submissions since {cutoff_date}")
 
-    # parse categories
+    # check if categories exist
     categories = config["categories"].split(",")
-    for category in categories:
-        categories.extend(category_map.get(category, ()))
+    categories = [cat.strip() for cat in categories]
+    try:
+        check_categories(categories)
+    except ValueError:
+        print()
+        print("One or more categories not found. Use --edit to adjust categories")
+        sys.exit(1)
+    except Exception as e:
+        print("Error while fetching categories:")
+        print(repr(e))
+        sys.exit(1)
 
+    # get entries from server and parse them
     try:
         entries = get_entries(
             categories, cutoff_date=cutoff_date,
             cross_lists=config["show_cross_lists"],
-            resubmissions=config["only_resubmissions"]
+            resubmissions=config["resubmissions"]
         )
     except Exception as e:
         print("Error while fetching feed:")
         print(repr(e))
         sys.exit(1)
 
+    # rate, sort, and print entries
     evaluate_entries(entries, keyword_ratings=config.keywords,
                      author_ratings=config.authors, rate_abstract=not config["ignore_abstract"])
     entries = sort_entries(
