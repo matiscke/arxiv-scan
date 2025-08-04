@@ -1,40 +1,68 @@
-"""Category group maps
+import urllib
+import urllib.request
 
-This module provides maps to map the group subject name to all members of the group,
-as the arXiv API only returns exact matches with the `cat` classifier
+from xml.etree import ElementTree
 
-Information from https://arxiv.org/category_taxonomy
-"""
+from .oai_api import namespaces, base_url, attempts
 
-category_map = {
-    "cs": ['cs.AI', 'cs.AR', 'cs.CC', 'cs.CE', 'cs.CG', 'cs.CL', 'cs.CR', 'cs.CV', 'cs.CY',
-           'cs.DB', 'cs.DC', 'cs.DL', 'cs.DM', 'cs.DS', 'cs.ET', 'cs.FL', 'cs.CC', 'cs.LO',
-           'cs.GL', 'cs.GR', 'cs.GT', 'cs.HC', 'cs.IR', 'cs.IT', 'cs.LG', 'cs.LG', 'cs.LO',
-           'cs.MA', 'cs.MM', 'cs.MS', 'cs.NA', 'cs.NA', 'cs.NE', 'cs.NI', 'cs.OH', 'cs.OS',
-           'cs.PF', 'cs.PL', 'cs.RO', 'cs.SC', 'cs.SD', 'cs.SE', 'cs.SI', 'cs.NI', 'cs.SY',
-           'cs.SY'],
-    "econ": ["econ.EM", "econ.GN", "econ.TH"],
-    "eess": ['eess.AS', 'eess.IV', 'eess.SP', 'eess.SY'],
-    "math": ['math.AC', 'math.AG', 'math.AP', 'math.AT', 'math.CA', 'math.CO', 'math.CT',
-             'math.CV', 'math.DG', 'math.DS', 'math.FA', 'math.GM', 'math.GN', 'math.GR',
-             'math.GT', 'math.HO', 'math.IT', 'math.IT', 'math.KT', 'math.LO', 'math.MG',
-             'math.MP', 'math.MP', 'math.NA', 'math.NT', 'math.OA', 'math.OC', 'math.PR',
-             'math.QA', 'math.RA', 'math.RT', 'math.SG', 'math.SP', 'math.ST'],
-    "astro-ph": ["astro-ph.CO", "astro-ph.EP", "astro-ph.GA",
-                 "astro-ph.HE", "astro-ph.IM", "astro-ph.SR"],
-    "cond-mat": ['cond-mat.dis-nn', 'cond-mat.mes-hall', 'cond-mat.mtrl-sci',
-                 'cond-mat.other', 'cond-mat.quant-gas', 'cond-mat.soft',
-                 'cond-mat.stat-mech', 'cond-mat.str-el', 'cond-mat.supr-con'],
-    "nlin": ['nlin.AO', 'nlin.CD', 'nlin.CG', 'nlin.PS', 'nlin.SI'],
-    "physics": ['physics.acc-ph', 'physics.ao-ph', 'physics.app-ph', 'physics.atm-clus',
-                'physics.atom-ph', 'physics.bio-ph', 'physics.chem-ph', 'physics.class-ph',
-                'physics.comp-ph', 'physics.data-an', 'physics.ed-ph', 'physics.flu-dyn',
-                'physics.gen-ph', 'physics.geo-ph', 'physics.hist-ph', 'physics.ins-det',
-                'physics.med-ph', 'physics.optics', 'physics.plasm-ph', 'physics.pop-ph',
-                'physics.soc-ph', 'physics.space-ph'],
-    "q-bio": ['q-bio.BM', 'q-bio.CB', 'q-bio.GN', 'q-bio.MN', 'q-bio.NC', 'q-bio.OT',
-              'q-bio.PE', 'q-bio.QM', 'q-bio.SC', 'q-bio.TO'],
-    "q-fin": ['q-fin.CP', 'q-fin.EC', 'q-fin.EC', 'q-fin.GN', 'q-fin.MF', 'q-fin.PM',
-              'q-fin.PR', 'q-fin.RM', 'q-fin.ST', 'q-fin.TR'],
-    "stat": ['stat.AP', 'stat.CO', 'stat.ME', 'stat.ML', 'stat.OT', 'stat.TH']
-}
+
+def check_categories(categories):
+    """Check if given arXiv categories exist
+
+    If one of the categories does not exist, we print all available categories
+    and raise ValueError.
+
+    Note that we obtain the recent arXiv categories with a (rather fast) server
+    request via the OAI API.
+
+    Args:
+        categories (list): List of arXiv subjects (e.g. `physics:astro-ph:EP`)
+    """
+    url = f"{base_url:s}?verb=ListSets"
+
+    # get data from server
+    for i in range(attempts):
+        try:
+            xml_data = urllib.request.urlopen(url)
+        except urllib.error.HTTPError as err:
+            if err.code == 503:
+                timeout = int(err.headers['Retry-After'])
+                time.sleep(timeout)
+            else:
+                raise err
+        else:
+            with xml_data:
+                tree = ElementTree.parse(xml_data)
+            break
+
+    # parse XML data
+    root = tree.getroot()
+    xml_categories = root.findall("./oai:ListSets/oai:set", namespaces=namespaces)
+
+    # retrieve categories from XML data
+    categories_all = []
+    for cat in xml_categories:
+        categories_all.append(cat.find("./oai:setSpec", namespaces=namespaces).text)
+    categories_all.sort()
+
+    # check if categories are found
+    not_found = []
+    for cat in categories:
+        if cat not in categories_all:
+            not_found.append(cat)
+
+    # print available categories in case one or more were not found
+    if len(not_found) > 0:
+        print("\nAvailable categories:")
+        groups = set([cat.split(":")[0] for cat in categories_all])
+        for group in groups:
+            print(group)
+            group_cat = []
+            for cat in categories_all:
+                if cat.startswith(group) and cat != group:
+                    group_cat.append(cat)
+            print(", ".join(group_cat))
+        print()
+        for cat in not_found:
+            print(f"Category not found: {cat:s}")
+        raise ValueError(f"Category not found")

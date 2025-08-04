@@ -23,12 +23,12 @@ class Config:
         self._config["keywords"] = {}
         self._config["authors"] = {}
         self._config["options"] = {
-            "categories": "astro-ph.EP",
+            "categories": "physics:astro-ph:EP",
             "date": "new",
             "length": -1,
             "minimum_rating": 10,
             "reverse_list": False,
-            "only_resubmissions": False,
+            "resubmissions": False,
             "show_cross_lists": True,
             "ignore_abstract": False,
         }
