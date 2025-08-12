@@ -40,13 +40,10 @@ class Entry(object):
 
     def mark_title_keyword(self, keyword: str) -> None:
         """Mark title at positions where keyword is found"""
-        counts = self.title.lower().count(keyword)
-        for _ in range(counts):
-            starts = [m.start() for m in re.finditer(keyword, self.title.lower())]
-            ends = [m.end() for m in re.finditer(keyword, self.title.lower())]
-            for s, e in zip(starts, ends):
-                for pos in range(s, e):
-                    self.mark_title_position(pos)
+        title_lower = self.title.lower()
+        for match in re.finditer(re.escape(keyword), title_lower):
+            for pos in range(match.start(), match.end()):
+                self.mark_title_position(pos)
 
     def mark_author(self, number: int) -> None:
         """Mark author (by given number in author list)"""
