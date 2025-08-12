@@ -107,7 +107,7 @@ def get_entries(
                 entry = xml2entry(record, namespaces)
 
                 if not cross_lists:
-                    if not entry.category.starswith(category):
+                    if not entry.category.startswith(category):
                         # the following matches indicate that it's NOT crossref
                         # "physics:astro-ph:EP" startswith "physics"
                         # "physics:astro-ph:EP" startswith "physics:astro-ph"
