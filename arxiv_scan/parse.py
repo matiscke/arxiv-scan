@@ -1,12 +1,15 @@
 """Functions relating to parsing Arxiv.org"""
 from datetime import datetime, timedelta
+from xml.etree import ElementTree
 
+import urllib
+import urllib.request
 import time
 import logging
-import feedparser
 import pytz
 
 from .entry_evaluation import Entry
+from .oai_api import namespaces, base_url, attempts, delay
 
 
 logger = logging.getLogger(__name__)
@@ -24,18 +27,26 @@ def datetime_fromisoformat(datestr: str):
     """
     return datetime.strptime(datestr, "%Y-%m-%dT%H:%M:%S")
 
-def atom2entry(entry: feedparser.util.FeedParserDict) -> Entry:
-    """Convert entry from API object to Entry object"""
+def xml2entry(record: ElementTree.Element, namespaces: dict) -> Entry:
+    """Convert entry from an XML object to an Entry object"""
+    identifier = record.find('./oai:header/oai:identifier', namespaces=namespaces).text
+    categories = record.findall('./oai:header/oai:setSpec', namespaces=namespaces)
+    title = record.find('./oai:metadata/arxivraw:arXivRaw/arxivraw:title', namespaces=namespaces).text
+    authors = record.find('./oai:metadata/arxivraw:arXivRaw/arxivraw:authors', namespaces=namespaces).text
+    abstract = record.find('./oai:metadata/arxivraw:arXivRaw/arxivraw:abstract', namespaces=namespaces).text
+    versions = record.findall('./oai:metadata/arxivraw:arXivRaw/arxivraw:version', namespaces=namespaces)
+    dates = []
+    for version in versions:
+        dates.append(version.find('./arxivraw:date', namespaces=namespaces).text)
     return Entry(
-        id=entry.id.split("/")[-1],
-        title=linebreak_fix(entry.title),
-        authors=[author["name"] for author in entry.authors],
-        abstract=linebreak_fix(entry.summary),
-        category=entry.arxiv_primary_category["term"],
-        date_submitted=pytz.utc.localize(datetime_fromisoformat(entry.published[:-1])),
-        date_updated=pytz.utc.localize(datetime_fromisoformat(entry.updated[:-1])),
+        id=identifier.split(":")[-1],
+        title=linebreak_fix(title),
+        authors=[author.strip() for author in authors.split(',')],
+        abstract=linebreak_fix(abstract),
+        category=categories[0].text,
+        date_submitted=pytz.utc.localize(datetime.strptime(dates[0], "%a, %d %b %Y %H:%M:%S %Z")),
+        date_updated=pytz.utc.localize(datetime.strptime(dates[-1], "%a, %d %b %Y %H:%M:%S %Z")),
     )
-
 
 def get_entries(
     categories: list,
@@ -46,100 +57,84 @@ def get_entries(
     """Get arXiv submissions from now back to cutoff_date
 
     Args:
-        categories (list): List of arXiv subjects (e.g. `astr-ph.EP`)
+        categories (list): List of arXiv subjects (e.g. `physics:astro-ph:EP`)
         cutoff_date (datetime.datetime): Get submissions since this date
         cross_lists (:obj:`bool`, optional): Include cross-lists (default: True)
-        resubmissions (:obj:`bool`, optional): Show only resubmissions (default: False)
+        resubmissions (:obj:`bool`, optional): Show also resubmissions (default: False)
 
     Returns:
         list of Entry
     """
 
-    # note: sortBy=lastUpdatedDate shows ONLY resubmissions because, apparently,
-    #       the submission date does not count as "lastUpdatedDate"
-    sortby = "lastUpdatedDate" if resubmissions else "submittedDate"
-
-    search_query = "+OR+".join(f"cat:{cat}" for cat in categories)
-
-    # delay between requests: 3 seconds is recommended by the arxiv API,
-    # but we try less before increasing the delay time
-    delay = 0.5
-    delay_min = 0.5
-    delay_max = 4.0
-
-    # number of requested results: should not be more than 1000 (see arxiv API)
-    # but it seems that the server (at the moment?) likes 800 better
-    max_results = 800
-
-    num_errors = 0
-    max_errors = 100  # exit program when too many errors occur
-
     entries = []
-    # Extract entries, make multiple requests if more than max_results entries
-    start = 0
-    finished = False
-    while not finished and num_errors <= max_errors:
-        arxiv_url = (
-            f"https://export.arxiv.org/api/query?search_query={search_query}"
-            f"&sortBy={sortby}&sortOrder=descending"
-            f"&start={start}&max_results={max_results}"
-        )
 
-        feed = feedparser.parse(arxiv_url)
+    date_from = cutoff_date.strftime("%Y-%m-%d")
 
-        logger.debug(f'Query: {arxiv_url:s}')
-        logger.debug(f'Encountered {num_errors:3d} errors so far and delay time is currently {delay:3.1f} seconds')
+    for category in categories:
 
-        # handle errors
-        if feed.bozo:
-            if isinstance(feed.bozo_exception.reason, ConnectionResetError):
-                logger.debug('Try again after ConnectionResetError: [Errno 104] Connection reset by peer')
-                num_errors += 1
-                delay = min(delay*2, delay_max)
-                time.sleep(delay)
-                continue  # try again
-            else:
-                raise feed.bozo_exception
+        category_url = urllib.parse.quote(category)
+        url = f"{base_url:s}?verb=ListRecords&metadataPrefix=arXivRaw&from={date_from:s}&set={category_url:s}"
+        skip = 0
 
-        if len(feed.entries) == 0:
-            # a response with no entries indicates a problem with the API response;
-            # only if the cutoff date was so far in the past that we ask for ALL
-            # entries in a category, this would lead to an infinite loop here,
-            # which we hopefully avoid by limiting all requests to 2 years
-            num_errors += 1
-            delay = min(delay*2, delay_max)
-            time.sleep(delay)
-            continue  # try again
+        while True:
+            logger.debug(f'Query: {url:s}')
 
-        for feedentry in feed.entries:
-            entry = atom2entry(feedentry)
-            # stop if cutoff date is reached
-            if entry.date_submitted < cutoff_date:
-                finished = True # mark outer loop finished
+            for i in range(attempts):
+                try:
+                    xml_data = urllib.request.urlopen(url)
+                except urllib.error.HTTPError as err:
+                    if err.code == 503:
+                        timeout = int(err.headers['Retry-After'])
+                        time.sleep(timeout)
+                    else:
+                        raise err
+                else:
+                    with xml_data:
+                        tree = ElementTree.parse(xml_data)
+                    break
+
+            root = tree.getroot()
+            records = root.findall("./oai:ListRecords/oai:record", namespaces=namespaces)
+
+            if len(records) == 0:
                 break
 
-            if not cross_lists and entry.category not in categories:
-                continue
-            entries.append(entry)
+            for r, record in enumerate(records):
 
-        # new startpoint for next request
-        # note: the number of feed entries might be < max_results
-        #       because of incomplete server replies
-        start += len(feed.entries)
+                if r < skip:
+                    continue
 
-        if len(feed.entries) < max_results:
-            # we obtained less data than requested
-            num_errors += 1
-            delay = min(delay*2, delay_max)
-        else:
-            # everything OK
-            delay = max(delay/2, delay_min)
+                entry = xml2entry(record, namespaces)
 
-        # play nice and sleep a bit (and the server replies are more stable)
-        time.sleep(delay)
+                if not cross_lists:
+                    if not entry.category.startswith(category):
+                        # the following matches indicate that it's NOT crossref
+                        # "physics:astro-ph:EP" startswith "physics"
+                        # "physics:astro-ph:EP" startswith "physics:astro-ph"
+                        # "physics:astro-ph:EP" startswith "physics:astro-ph:EP"
+                        continue  # skip
 
-    if num_errors > max_errors:
-        raise IOError('Could not retreive data because of too many errors with the arxiv API')
+                if resubmissions:
+                    # if resubmissions are allowed: compare last date (update date)
+                    if entry.date_updated < cutoff_date:
+                        continue  # skip
+                else:
+                    # if resubmissions are not allowed: compare first date (submission date)
+                    if entry.date_submitted < cutoff_date:
+                        continue  # skip
+
+                entries.append(entry)
+
+            resumption = root.find("./oai:ListRecords/oai:resumptionToken", namespaces=namespaces)
+            if resumption is None:
+                break
+
+            resumption = urllib.parse.unquote(resumption.text)
+            next_url = resumption.split("&skip=")[0]
+            skip = int(resumption.split("&skip=")[1])
+
+            url = f"{base_url:s}?{next_url:s}"
+            time.sleep(delay)  # play nice
 
     return entries
 
