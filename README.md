@@ -96,7 +96,7 @@ habitable = 3
 [options]
 # other options (can also be set on CLI)
 # default is used if omitted
-categories = astro-ph:EP
+categories = physics:astro-ph:EP
 date = new
 length = -1
 minimum_rating = 10 
