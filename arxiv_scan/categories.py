@@ -1,5 +1,6 @@
 import urllib
 import urllib.request
+import time
 
 from xml.etree import ElementTree
 
